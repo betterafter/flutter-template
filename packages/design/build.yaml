@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      design|image_generator:
+        enabled: true
+        generate_for:
+          - lib/images/image.dart
+
+builders:
+  image_generator:
+    import: "package:design/images/image.generator.dart"
+    builder_factories: ["imageGeneratorBuilder"]
+    build_extensions: {".dart": [".generated.dart"]}
+    auto_apply: none
+    build_to: source

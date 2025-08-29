@@ -1,0 +1,43 @@
+name: presentation
+description: "A new Flutter package project."
+publish_to: none
+version: 0.0.1
+
+environment:
+  sdk: ^3.5.3
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # 비동기 라이브러리
+  riverpod_annotation: ^2.3.5
+  hooks_riverpod: ^2.5.1
+  flutter_riverpod: ^2.5.1
+
+  # 디자인 라이브러리
+  design:
+    path: ../design
+
+  # 라우팅 라이브러리
+  go_router: ^15.1.2
+
+  # 빌드 관련 라이브러리
+  build_runner: ^2.4.6
+  riverpod_generator: ^2.4.0
+  riverpod_lint: ^2.3.10
+
+  domain:
+    path: ../domain
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  injectable: ^2.5.0
+  injectable_generator: ^2.5.0
+
+  # 의존성 주입 라이브러리
+  get_it: ^8.0.3

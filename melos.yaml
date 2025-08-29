@@ -1,0 +1,38 @@
+name: my_workspace
+
+packages:
+  - lib/**
+  - packages/**
+
+scripts:
+  build:all:
+    run: melos exec -c 1 -- "flutter clean && flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs"
+
+  build:di:
+    run: melos exec -c 1 -- "flutter pub run build_runner build --delete-conflicting-outputs"
+
+  build:design:
+    run: melos exec -c 1 --scope=design -- "find lib -name 'image.generated.dart' -delete && flutter pub run build_runner build --delete-conflicting-outputs"
+
+  build:presentation:
+    run: melos exec -c 1 --scope=presentation -- "flutter pub run build_runner build --delete-conflicting-outputs"
+
+  build:data:
+    run: melos exec -c 1 --scope=data -- "flutter pub run build_runner build --delete-conflicting-outputs"
+
+  build:domain:
+    run: melos exec -c 1 --scope=domain -- "flutter pub run build_runner build --delete-conflicting-outputs"
+
+  clean:
+    run: melos exec -- flutter clean
+
+  analyze:
+    run: melos exec -- flutter analyze
+
+
+# [   melos run build:runner   ] : build runner 실행
+# [   melos run clean   ] : 클린 실행
+# [   melos run analyze   ] : 분석 실행
+# [   melos bootstrap   ] : 부트스트랩 실행 (pub get 실행)
+# [   melos exec --scope=data -- flutter pub run build_runner build   ] : data 범위에서 build runner 실행
+# [   melos exec -- flutter test   ] : 테스트 실행
