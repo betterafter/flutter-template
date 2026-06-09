@@ -1,0 +1,1 @@
+export 'domain.generated.dart';

@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      data|auto_generator:
+        enabled: true
+        generate_for:
+          - lib/data.dart
+
+builders:
+  auto_generator:
+    import: "package:data/module.generator.dart"
+    builder_factories: ["autoGeneratorBuilder"]
+    build_extensions: {".dart": [".generated.dart"]}
+    auto_apply: none
+    build_to: source

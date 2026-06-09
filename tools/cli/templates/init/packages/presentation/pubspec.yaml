@@ -1,0 +1,31 @@
+name: presentation
+description: Presentation layer for Clean Architecture.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.5.3
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  riverpod_annotation: ^2.3.5
+  hooks_riverpod: ^2.5.1
+  flutter_riverpod: ^2.5.1
+  design:
+    path: ../design
+  go_router: ^15.1.2
+  domain:
+    path: ../domain
+  injectable: ^2.5.0
+  get_it: ^8.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  riverpod_generator: ^2.4.0
+  riverpod_lint: ^2.3.10
+  injectable_generator: ^2.5.0
