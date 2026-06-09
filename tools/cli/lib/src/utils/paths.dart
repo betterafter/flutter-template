@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:path/path.dart' as p;
 
@@ -30,24 +31,21 @@ class ProjectPaths {
       Directory(p.join(packagesDir, 'design')).existsSync();
 }
 
-/// pub.dev global install, `dart run`, 로컬 개발 모두에서 templates/ 경로를 찾습니다.
-String cliPackageRoot() {
-  final script = Platform.script.toFilePath();
-  final candidates = [
-    p.normalize(p.join(p.dirname(script), '..')),
-    p.normalize(p.join(p.dirname(script), '..', '..')),
-  ];
+/// pub.dev global install(snapshot), dart run, 로컬 개발 모두에서 동작합니다.
+Future<String> templateRoot() async {
+  final uri = await Isolate.resolvePackageUri(
+    Uri.parse(
+      'package:flutter_clean_arch_scaffold/src/templates/init/melos.yaml',
+    ),
+  );
 
-  for (final candidate in candidates) {
-    if (Directory(p.join(candidate, 'templates')).existsSync()) {
-      return candidate;
-    }
+  if (uri == null) {
+    throw StateError(
+      'CLI templates 디렉터리를 찾을 수 없습니다.\n'
+      'flutter_clean_arch_scaffold 패키지가 올바르게 설치되었는지 확인해주세요.',
+    );
   }
 
-  throw StateError(
-    'CLI templates 디렉터리를 찾을 수 없습니다.\n'
-    'flutter_clean_arch_scaffold 패키지가 올바르게 설치되었는지 확인해주세요.',
-  );
+  // .../lib/src/templates/init/melos.yaml → .../lib/src/templates
+  return p.normalize(p.join(p.dirname(uri.toFilePath()), '..'));
 }
-
-String templateRoot() => p.join(cliPackageRoot(), 'templates');
