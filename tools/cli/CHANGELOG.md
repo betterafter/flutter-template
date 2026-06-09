@@ -1,3 +1,8 @@
+## 0.1.3
+
+- `init` 시 payment 예시 feature를 함께 생성 (domain / data / presentation)
+- `init --force` 시 `main.dart`에 `PaymentPage` 홈 화면 포함
+
 ## 0.1.2
 
 - README 사용법을 순서대로 한 블록으로 정리

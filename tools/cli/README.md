@@ -2,8 +2,13 @@
 
 Flutter Clean Architecture 구조를 **기존 Flutter 프로젝트에 복제**하는 CLI입니다.
 
-`flutter create`로 만든 프로젝트에 `packages/domain`, `data`, `presentation`, `design`과 `melos.yaml`을 추가합니다.  
-`android/`, `ios/` 설정은 건드리지 않습니다.
+`flutter_clean_arch init` 한 번으로:
+
+- `packages/domain`, `data`, `presentation`, `design`과 `melos.yaml` 생성
+- **`payment` 예시 feature** 자동 생성 (entity · dto · mapper · datasource · usecase · provider · page)
+- `android/`, `ios/` 설정은 건드리지 않음
+
+새 feature는 `payment` 폴더 구조를 보고 `add feature`로 추가합니다.
 
 ---
 
@@ -22,14 +27,14 @@ export PATH="$PATH:$HOME/.pub-cache/bin"
 flutter create my_app
 cd my_app
 
-# Clean Architecture 구조 복제
+# Clean Architecture 구조 복제 + payment 예시 feature
 flutter_clean_arch init
 
 # lib/main.dart 수정 — init이 기존 main.dart를 유지한 경우 필수
 # import 'di.dart'; 추가 후 main() 맨 앞에 configureDependencies(); 호출
 
-# feature 추가
-flutter_clean_arch add feature payment --with-ui
+# 새 feature 추가 (payment 예시를 참고)
+flutter_clean_arch add feature order --with-ui
 
 # 의존성 설치 + 코드 생성
 dart pub global activate melos
@@ -54,7 +59,9 @@ void main() {
 }
 ```
 
-`init --force`를 쓰면 `main.dart`가 템플릿으로 교체되어 위 코드가 포함됩니다.
+`init --force`를 쓰면 `main.dart`가 템플릿으로 교체되어 위 코드와 `PaymentPage` 홈 화면이 포함됩니다.
+
+`init`은 **payment 예시 feature**도 함께 생성합니다 (`domain` / `data` / `presentation` 전 레이어).
 
 ---
 

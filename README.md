@@ -2,10 +2,13 @@
 
 Flutter Clean Architecture 구조를 **CLI로 프로젝트에 복제**하는 템플릿입니다.
 
+`flutter_clean_arch init` 한 번으로 **멀티 패키지 뼈대**(`domain` / `data` / `presentation` / `design`)와 함께, **`payment` 예시 feature**가 전 레이어에 자동 생성됩니다.  
+entity · repository · usecase · datasource · dto · mapper · provider · page 구조를 그대로 참고해 새 feature를 만들면 됩니다.
+
 | 구분 | 설명 |
 |------|------|
-| **사용자** | [pub.dev](https://pub.dev/packages/flutter_clean_arch_scaffold)에서 CLI 설치 |
-| **이 저장소** | CLI 소스 + 구조 참고 구현 (`payment` 예시) |
+| **사용자** | [pub.dev](https://pub.dev/packages/flutter_clean_arch_scaffold)에서 CLI 설치 → `init` |
+| **이 저장소** | CLI 소스 + `payment` 예시 구현 (init이 생성하는 기준) |
 
 ---
 
@@ -24,14 +27,14 @@ export PATH="$PATH:$HOME/.pub-cache/bin"
 flutter create my_shop
 cd my_shop
 
-# Clean Architecture 구조 복제
+# Clean Architecture 구조 복제 + payment 예시 feature
 flutter_clean_arch init
 
 # lib/main.dart 수정 — init이 기존 main.dart를 유지한 경우 필수
 # import 'di.dart'; 추가 후 main() 맨 앞에 configureDependencies(); 호출
 
-# feature 추가
-flutter_clean_arch add feature payment --with-ui
+# 새 feature 추가 (payment 예시를 참고)
+flutter_clean_arch add feature order --with-ui
 
 # 의존성 설치 + 코드 생성
 dart pub global activate melos
@@ -56,7 +59,15 @@ void main() {
 }
 ```
 
-`init --force`를 쓰면 `main.dart`가 템플릿으로 교체되어 위 코드가 포함됩니다.
+`init --force`를 쓰면 `main.dart`가 템플릿으로 교체되어 위 코드와 `PaymentPage` 홈 화면이 포함됩니다.
+
+`init`은 **payment 예시 feature**도 함께 생성합니다. 새 feature를 만들 때 이 구조를 참고하세요.
+
+```
+packages/domain/lib/domain/payment/
+packages/data/lib/data/payment/
+packages/presentation/lib/payment/
+```
 
 ### feature 추가 후 할 일
 
