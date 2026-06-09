@@ -15,6 +15,7 @@ Flutter Clean Architecture 구조를 **CLI 한 줄로 프로젝트에 복제**�
 
 ```bash
 dart pub global activate flutter_clean_arch_scaffold
+# 또는 최신 버전 고정: dart pub global activate flutter_clean_arch_scaffold 0.1.1
 ```
 
 PATH 설정 (`~/.pub-cache/bin`):
