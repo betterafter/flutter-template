@@ -30,9 +30,24 @@ class ProjectPaths {
       Directory(p.join(packagesDir, 'design')).existsSync();
 }
 
+/// pub.dev global install, `dart run`, 로컬 개발 모두에서 templates/ 경로를 찾습니다.
 String cliPackageRoot() {
   final script = Platform.script.toFilePath();
-  return p.normalize(p.join(p.dirname(script), '..'));
+  final candidates = [
+    p.normalize(p.join(p.dirname(script), '..')),
+    p.normalize(p.join(p.dirname(script), '..', '..')),
+  ];
+
+  for (final candidate in candidates) {
+    if (Directory(p.join(candidate, 'templates')).existsSync()) {
+      return candidate;
+    }
+  }
+
+  throw StateError(
+    'CLI templates 디렉터리를 찾을 수 없습니다.\n'
+    'flutter_clean_arch_scaffold 패키지가 올바르게 설치되었는지 확인해주세요.',
+  );
 }
 
 String templateRoot() => p.join(cliPackageRoot(), 'templates');

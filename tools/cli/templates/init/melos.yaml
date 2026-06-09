@@ -1,6 +1,7 @@
 name: my_workspace
 
 packages:
+  - .
   - packages/**
 
 scripts:
