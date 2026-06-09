@@ -1,9 +1,9 @@
 name: flutter_clean_arch_scaffold
 description: >
-  Flutter Clean Architecture 프로젝트 스캐폴딩 CLI.
-  `flutter_clean_arch init`으로 기존 Flutter 프로젝트에 domain/data/presentation/design 구조를 복제하고,
-  `add feature`로 feature 파일을 생성합니다.
-version: 0.1.1
+  Flutter Clean Architecture 스캐폴딩 CLI. `flutter_clean_arch init`으로
+  domain/data/presentation/design 멀티 패키지 구조를 복제하고, `add feature`로
+  entity·dto·mapper·usecase 파일을 생성합니다.
+version: 0.1.2
 homepage: https://github.com/betterafter/flutter-template
 repository: https://github.com/betterafter/flutter-template
 issue_tracker: https://github.com/betterafter/flutter-template/issues

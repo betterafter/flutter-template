@@ -80,6 +80,7 @@ class InitCommand extends Command<int> {
     created.add('pubspec.yaml (path 의존성 추가)');
 
     final mainPath = p.join(project.root, 'lib', 'main.dart');
+    var mainDartPreserved = false;
     if (!File(mainPath).existsSync() || force) {
       await writer.writeFile(
         path: mainPath,
@@ -88,13 +89,22 @@ class InitCommand extends Command<int> {
       );
       created.add('lib/main.dart');
     } else {
-      stdout.writeln(
-        'ℹ lib/main.dart는 기존 파일을 유지했습니다. configureDependencies() 호출을 직접 추가해주세요.',
-      );
+      mainDartPreserved = true;
     }
 
     for (final item in created) {
       stdout.writeln('✓ $item');
+    }
+
+    if (mainDartPreserved) {
+      stdout.writeln('');
+      stdout.writeln('⚠ lib/main.dart는 기존 파일을 유지했습니다.');
+      stdout.writeln('  아래 코드를 lib/main.dart에 추가해주세요:\n');
+      stdout.writeln("  import 'di.dart';\n");
+      stdout.writeln('  void main() {');
+      stdout.writeln('    configureDependencies();');
+      stdout.writeln('    runApp(const MainApp());');
+      stdout.writeln('  }');
     }
 
     if (!skipBuild) {
