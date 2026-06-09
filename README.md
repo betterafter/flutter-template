@@ -17,7 +17,7 @@ project/
 ├── lib/                    # 앱 셸 (main, DI 조합)
 ├── packages/
 │   ├── domain/             # entity, repository, usecase
-│   ├── data/               # datasource, model, repository impl
+│   ├── data/               # datasource, dto, mapper, repository impl
 │   ├── presentation/       # provider, page
 │   └── design/             # 디자인 시스템, assets
 ├── melos.yaml
@@ -28,32 +28,79 @@ project/
 
 ---
 
-## CLI 설치
+## payment 예시 (레이어별 구조)
 
-CLI는 이 저장소의 `tools/cli` 패키지로 제공됩니다.
+이 저장소에는 `payment` feature가 **각 레이어의 구조 예시**로 포함되어 있습니다.
+
+```
+packages/domain/lib/domain/payment/
+├── entity/payment.entity.dart
+├── repository/payment.repository.dart
+└── usecase/payment.usecase.dart
+
+packages/data/lib/data/payment/
+├── datasource/payment.remote.datasource.dart
+├── dto/payment.dto.dart
+├── dto/payment.dto.parser.dart
+├── mapper/payment.mapper.dart
+└── repository/payment.repository.dart       # PaymentRepositoryImpl
+
+packages/presentation/lib/payment/
+├── provider/payment.provider.dart
+└── page/payment.page.dart
+```
+
+새 feature를 추가할 때도 동일한 폴더 규칙을 따릅니다.
+
+---
+
+## CLI 사용법
+
+CLI 소스는 `tools/cli/`에 있습니다.  
+**별도 설치 없이** 이 저장소를 클론한 뒤 아래 명령을 그대로 실행하면 됩니다.
+
+### 이 저장소에서 실행 (가장 흔한 경우)
+
+프로젝트 **루트**에서:
 
 ```bash
-# 저장소 클론 후 CLI 디렉터리로 이동
-cd tools/cli
-dart pub get
+# feature 추가
+dart run tools/cli/bin/flutter_clean_arch.dart add feature user_profile --with-ui
+
+# 도움말
+dart run tools/cli/bin/flutter_clean_arch.dart --help
 ```
+
+> `<cli-path>` 같은 경로 placeholder는 없습니다.  
+> 위처럼 `tools/cli/bin/flutter_clean_arch.dart`를 **프로젝트 루트 기준**으로 실행하면 됩니다.
+
+### 다른 Flutter 프로젝트에 구조 주입할 때
+
+```bash
+# 1. 새 앱 생성
+flutter create my_app
+cd my_app
+
+# 2. 이 저장소의 CLI를 복사하거나 클론한 경로를 지정해서 init
+dart run /path/to/flutter-template/tools/cli/bin/flutter_clean_arch.dart init
+```
+
+`/path/to/flutter-template`은 이 템플릿 저장소가 클론된 실제 경로로 바꿔주세요.
 
 ### 전역 설치 (선택)
 
+매번 경로를 치기 싫다면:
+
 ```bash
 cd tools/cli
+dart pub get
 dart pub global activate --source path .
+
+# 이후 어디서든
+flutter_clean_arch add feature login --with-ui
 ```
 
-설치 후 어디서든 `flutter_clean_arch` 명령을 사용할 수 있습니다.
-
-### 로컬 실행 (권장)
-
-프로젝트 루트에서:
-
-```bash
-dart run tools/cli/bin/flutter_clean_arch.dart <command>
-```
+`dart pub global activate` 후에는 `flutter_clean_arch` 명령만으로 사용할 수 있습니다.
 
 ---
 
@@ -65,12 +112,8 @@ dart run tools/cli/bin/flutter_clean_arch.dart <command>
 `android/`, `ios/` 등 플랫폼 설정은 건드리지 않습니다.
 
 ```bash
-# 1. 새 Flutter 프로젝트 생성
-flutter create my_app
-cd my_app
-
-# 2. Clean Architecture 구조 주입
-dart run <path-to-cli>/bin/flutter_clean_arch.dart init
+# 다른 프로젝트 디렉터리에서 실행
+dart run /path/to/flutter-template/tools/cli/bin/flutter_clean_arch.dart init
 ```
 
 #### 생성되는 항목
@@ -91,19 +134,6 @@ dart run <path-to-cli>/bin/flutter_clean_arch.dart init
 |------|------|
 | `-f`, `--force` | 이미 존재하는 파일을 덮어씁니다 |
 | `--skip-build` | init 후 `build_runner`를 실행하지 않습니다 |
-
-#### 예시
-
-```bash
-# 기본 실행 (build_runner 포함)
-dart run tools/cli/bin/flutter_clean_arch.dart init
-
-# 기존 main.dart 유지, build_runner 생략
-dart run tools/cli/bin/flutter_clean_arch.dart init --skip-build
-
-# 이미 구조가 있을 때 강제 덮어쓰기
-dart run tools/cli/bin/flutter_clean_arch.dart init --force
-```
 
 #### init 이후
 
@@ -136,24 +166,24 @@ dart run tools/cli/bin/flutter_clean_arch.dart add feature <feature_name>
 
 #### 기본 생성 구조
 
-`add feature payment` 실행 시:
+`add feature payment` 실행 시 (`payment` 예시와 동일):
 
 ```
 packages/domain/lib/domain/payment/
-├── entity/
-│   └── payment.entity.dart
-├── repository/
-│   └── payment.repository.dart
-└── usecase/
-    └── payment.usecase.dart
+├── entity/payment.entity.dart
+├── repository/payment.repository.dart
+└── usecase/payment.usecase.dart
 
 packages/data/lib/data/payment/
-├── datasource/
-│   └── payment.remote.datasource.dart
-├── model/
-│   └── payment.model.dart
-└── repository/
-    └── payment.repository.dart          # PaymentRepositoryImpl
+├── datasource/payment.remote.datasource.dart
+├── dto/payment.dto.dart
+├── dto/payment.dto.parser.dart
+├── mapper/payment.mapper.dart
+└── repository/payment.repository.dart
+
+packages/presentation/lib/payment/    # --with-ui 옵션 시
+├── provider/payment.provider.dart
+└── page/payment.page.dart
 ```
 
 #### 옵션
@@ -169,43 +199,26 @@ packages/data/lib/data/payment/
 #### 예시
 
 ```bash
-# 기본 (domain + data, 메서드: getPayments)
-dart run tools/cli/bin/flutter_clean_arch.dart add feature payment
+# 기본 (domain + data)
+dart run tools/cli/bin/flutter_clean_arch.dart add feature order
 
-# local datasource + UI 포함
-dart run tools/cli/bin/flutter_clean_arch.dart add feature payment --with-local --with-ui
+# UI까지 포함
+dart run tools/cli/bin/flutter_clean_arch.dart add feature order --with-ui
+
+# local datasource + UI
+dart run tools/cli/bin/flutter_clean_arch.dart add feature order --with-local --with-ui
 
 # 메서드 지정
-dart run tools/cli/bin/flutter_clean_arch.dart add feature payment \
-  --methods getPayments,createPayment,cancelPayment
-
-# build_runner 없이 파일만 생성
-dart run tools/cli/bin/flutter_clean_arch.dart add feature payment --skip-build
-```
-
-#### `--with-ui` 추가 생성 구조
-
-```
-packages/presentation/lib/payment/
-├── provider/
-│   └── payment.provider.dart
-└── page/
-    └── payment.page.dart
-```
-
-#### `--with-local` 추가 생성
-
-```
-packages/data/lib/data/payment/datasource/
-├── payment.remote.datasource.dart
-└── payment.local.datasource.dart
+dart run tools/cli/bin/flutter_clean_arch.dart add feature order \
+  --methods getOrders,createOrder
 ```
 
 #### 생성 후 할 일
 
-1. `entity`, `model` 필드 정의
-2. `datasource`에 API / 로컬 저장소 구현
-3. `repository impl` 비즈니스 로직 구현
+1. `entity`, `dto` 필드 정의
+2. `datasource`에 API 호출 구현 (`compute`로 JSON 파싱)
+3. `mapper`에 dto → entity 변환 로직 구현
+4. `repository impl`에서 datasource + mapper 조합
 4. (UI 생성 시) `page` 위젯 구현
 
 `build_runner`가 자동 실행되면 barrel export(`*.generated.dart`)와 Injectable DI 등록이 갱신됩니다.
@@ -248,7 +261,7 @@ design       → (독립)
 ```
 
 - `domain`: Flutter/UI에 의존하지 않는 순수 비즈니스 규칙
-- `data`: `datasource` → `model` → `repository impl`
+- `data`: `datasource` → `dto` → `mapper` → `repository impl`
 - `presentation`: `usecase`만 직접 사용 (repository 직접 참조 X)
 
 ---
@@ -256,19 +269,13 @@ design       → (독립)
 ## 전체 워크플로 요약
 
 ```bash
-# 1. 앱 생성
+# [이 저장소] feature 추가
+dart run tools/cli/bin/flutter_clean_arch.dart add feature login --with-ui
+
+# [새 프로젝트] 구조 주입
 flutter create my_app && cd my_app
-
-# 2. 구조 주입
-dart run <cli-path>/bin/flutter_clean_arch.dart init
-
-# 3. feature 추가
-dart run <cli-path>/bin/flutter_clean_arch.dart add feature payment --with-ui
-
-# 4. 비즈니스 로직 구현
-# packages/domain/lib/domain/payment/
-# packages/data/lib/data/payment/
-# packages/presentation/lib/payment/
+dart run ../flutter-template/tools/cli/bin/flutter_clean_arch.dart init
+dart run ../flutter-template/tools/cli/bin/flutter_clean_arch.dart add feature login --with-ui
 ```
 
 ---

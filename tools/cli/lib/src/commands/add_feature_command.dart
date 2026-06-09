@@ -119,8 +119,20 @@ class _AddFeatureSubCommand extends Command<int> {
     );
 
     await write(
-      project.dataPackage('lib/data/${feature.fileName}/model/${feature.fileName}.model.dart'),
-      generator.model(),
+      project.dataPackage('lib/data/${feature.fileName}/dto/${feature.fileName}.dto.dart'),
+      generator.dto(),
+    );
+    await write(
+      project.dataPackage(
+        'lib/data/${feature.fileName}/dto/${feature.fileName}.dto.parser.dart',
+      ),
+      generator.dtoParser(),
+    );
+    await write(
+      project.dataPackage(
+        'lib/data/${feature.fileName}/mapper/${feature.fileName}.mapper.dart',
+      ),
+      generator.mapper(),
     );
     await write(
       project.dataPackage(
