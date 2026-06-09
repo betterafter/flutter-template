@@ -1,3 +1,8 @@
+## 0.1.4
+
+- README 상단에 `init` 시 payment 예시 feature 자동 생성 설명 추가
+- pub.dev `description` 문구 업데이트
+
 ## 0.1.3
 
 - `init` 시 payment 예시 feature를 함께 생성 (domain / data / presentation)
