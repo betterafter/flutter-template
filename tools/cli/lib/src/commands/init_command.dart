@@ -49,7 +49,7 @@ class InitCommand extends Command<int> {
     }
 
     final writer = FileWriter();
-    final initRoot = p.join(templateRoot(), 'init');
+    final initRoot = p.join(await templateRoot(), 'init');
     final created = <String>[];
 
     stdout.writeln('Clean Architecture 구조를 생성합니다...\n');

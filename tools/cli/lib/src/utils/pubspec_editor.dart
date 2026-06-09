@@ -74,8 +74,7 @@ class PubspecEditor {
   }
 
   void _ensureMap(YamlEditor editor, List<String> path) {
-    final node = editor.parseAt(path);
-    if (node.value == null) {
+    if (_tryParseAt(editor, path) == null) {
       editor.update(path, <String, dynamic>{});
     }
   }
@@ -86,9 +85,8 @@ class PubspecEditor {
     required String name,
     required String path,
   }) {
-    final sectionPath = [section];
-    final keyPath = [...sectionPath, name];
-    final existing = editor.parseAt(keyPath).value;
+    final keyPath = [section, name];
+    final existing = _tryParseAt(editor, keyPath);
 
     if (existing == null) {
       editor.update(keyPath, {'path': path});
@@ -109,9 +107,16 @@ class PubspecEditor {
     required String value,
   }) {
     final keyPath = [section, name];
-    final existing = editor.parseAt(keyPath).value;
-    if (existing == null) {
+    if (_tryParseAt(editor, keyPath) == null) {
       editor.update(keyPath, value);
+    }
+  }
+
+  Object? _tryParseAt(YamlEditor editor, List<String> path) {
+    try {
+      return editor.parseAt(path).value;
+    } catch (_) {
+      return null;
     }
   }
 }

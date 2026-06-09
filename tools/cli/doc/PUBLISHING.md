@@ -36,7 +36,7 @@ dart analyze
 dart pub publish --dry-run
 ```
 
-`templates/` 디렉터리가 패키지에 포함되는지 반드시 확인하세요.
+`lib/src/templates/` 디렉터리가 패키지에 포함되는지 반드시 확인하세요.
 
 ### 로컬 동작 확인
 
