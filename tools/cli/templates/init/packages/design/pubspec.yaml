@@ -1,0 +1,28 @@
+name: design
+description: Design system package for Clean Architecture.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.5.3
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  build: ^2.4.0
+  path: ^1.9.0
+  source_gen: ^1.4.0
+
+flutter:
+  assets:
+    - assets/images/
+    - assets/icons/

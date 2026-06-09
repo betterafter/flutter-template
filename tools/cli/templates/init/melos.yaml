@@ -1,0 +1,29 @@
+name: my_workspace
+
+packages:
+  - packages/**
+
+scripts:
+  build:all:
+    run: melos exec -c 1 -- "flutter pub get && dart run build_runner build --delete-conflicting-outputs"
+
+  build:di:
+    run: melos exec -c 1 -- "dart run build_runner build --delete-conflicting-outputs"
+
+  build:design:
+    run: melos exec -c 1 --scope=design -- "find lib -name 'image.generated.dart' -delete && dart run build_runner build --delete-conflicting-outputs"
+
+  build:presentation:
+    run: melos exec -c 1 --scope=presentation -- "dart run build_runner build --delete-conflicting-outputs"
+
+  build:data:
+    run: melos exec -c 1 --scope=data -- "dart run build_runner build --delete-conflicting-outputs"
+
+  build:domain:
+    run: melos exec -c 1 --scope=domain -- "dart run build_runner build --delete-conflicting-outputs"
+
+  clean:
+    run: melos exec -- flutter clean
+
+  analyze:
+    run: melos exec -- flutter analyze
