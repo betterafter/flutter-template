@@ -33,19 +33,26 @@ class ProjectPaths {
 
 /// pub.dev global install(snapshot), dart run, 로컬 개발 모두에서 동작합니다.
 Future<String> templateRoot() async {
-  final uri = await Isolate.resolvePackageUri(
-    Uri.parse(
-      'package:flutter_clean_arch_scaffold/src/templates/init/melos.yaml',
-    ),
+  final markerUri = await Isolate.resolvePackageUri(
+    Uri.parse('package:flutter_clean_arch_scaffold/src/_package_marker.dart'),
   );
 
-  if (uri == null) {
-    throw StateError(
-      'CLI templates 디렉터리를 찾을 수 없습니다.\n'
-      'flutter_clean_arch_scaffold 패키지가 올바르게 설치되었는지 확인해주세요.',
-    );
+  if (markerUri == null) {
+    throw StateError(_templateErrorMessage);
   }
 
-  // .../lib/src/templates/init/melos.yaml → .../lib/src/templates
-  return p.normalize(p.join(p.dirname(uri.toFilePath()), '..'));
+  final packageRoot = p.normalize(
+    p.join(p.dirname(markerUri.toFilePath()), '..', '..'),
+  );
+  final templatesPath = p.join(packageRoot, 'templates');
+
+  if (!Directory(templatesPath).existsSync()) {
+    throw StateError(_templateErrorMessage);
+  }
+
+  return templatesPath;
 }
+
+const _templateErrorMessage =
+    'CLI templates 디렉터리를 찾을 수 없습니다.\n'
+    'flutter_clean_arch_scaffold 패키지가 올바르게 설치되었는지 확인해주세요.';
