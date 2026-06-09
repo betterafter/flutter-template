@@ -110,7 +110,14 @@ class InitCommand extends Command<int> {
     }
 
     stdout.writeln('\n완료! 다음 명령으로 feature를 추가할 수 있습니다.');
-    stdout.writeln('  dart run flutter_clean_arch_cli:add feature payment');
+    stdout.writeln('  flutter_clean_arch add feature payment --with-ui');
+    if (!skipBuild) {
+      stdout.writeln('\n의존성 설치와 코드 생성이 완료되었습니다.');
+    } else {
+      stdout.writeln('\n다음 명령을 실행해주세요.');
+      stdout.writeln('  melos bootstrap');
+      stdout.writeln('  melos run build:all');
+    }
     return 0;
   }
 
