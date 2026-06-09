@@ -1,3 +1,15 @@
+## 0.1.3
+
+- `init` 시 payment 예시 feature를 함께 생성 (domain / data / presentation)
+- `init --force` 시 `main.dart`에 `PaymentPage` 홈 화면 포함
+
+## 0.1.2
+
+- README 사용법을 순서대로 한 블록으로 정리
+- `main.dart`에 `configureDependencies()` 추가 안내 보강
+- CLI `init` 완료 시 `main.dart` 수정 가이드 출력
+- `deactivate` 후 재설치 문제 해결 가이드 추가
+
 ## 0.1.1
 
 - pub.dev global install(snapshot) 환경에서 templates 경로를 찾지 못하던 문제 수정

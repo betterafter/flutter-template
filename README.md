@@ -1,149 +1,107 @@
 # Flutter Clean Architecture Template
 
-Flutter Clean Architecture 구조를 **CLI 한 줄로 프로젝트에 복제**할 수 있는 템플릿입니다.
+Flutter Clean Architecture 구조를 **CLI로 프로젝트에 복제**하는 템플릿입니다.
+
+`flutter_clean_arch init` 한 번으로 **멀티 패키지 뼈대**(`domain` / `data` / `presentation` / `design`)와 함께, **`payment` 예시 feature**가 전 레이어에 자동 생성됩니다.  
+entity · repository · usecase · datasource · dto · mapper · provider · page 구조를 그대로 참고해 새 feature를 만들면 됩니다.
 
 | 구분 | 설명 |
 |------|------|
-| **사용자** | pub.dev에서 `flutter_clean_arch_scaffold` 설치 → `flutter_clean_arch init` |
-| **이 저장소** | CLI 소스 + 구조 참고 구현 (`payment` 예시) |
+| **사용자** | [pub.dev](https://pub.dev/packages/flutter_clean_arch_scaffold)에서 CLI 설치 → `init` |
+| **이 저장소** | CLI 소스 + `payment` 예시 구현 (init이 생성하는 기준) |
 
 ---
 
 ## 사용 방법
 
-### 1. CLI 설치 (최초 1회)
+아래를 **위에서부터 순서대로** 실행하세요.
 
 ```bash
+# CLI 설치 (최초 1회)
 dart pub global activate flutter_clean_arch_scaffold
-# 또는 최신 버전 고정: dart pub global activate flutter_clean_arch_scaffold 0.1.1
-```
 
-PATH 설정 (`~/.pub-cache/bin`):
-
-```bash
+# PATH 설정
 export PATH="$PATH:$HOME/.pub-cache/bin"
-```
 
-> pub.dev 배포 전 로컬 테스트:
-> ```bash
-> cd tools/cli && dart pub global activate --source path .
-> ```
-
-### 2. Flutter 프로젝트 생성
-
-```bash
-flutter create my_shop
-cd my_shop
-```
-
-### 3. Clean Architecture 구조 복제
-
-```bash
-flutter_clean_arch init
-```
-
-사용자 프로젝트에 아래가 **복제**됩니다. `android/`, `ios/`는 그대로입니다.
-
-```
-my_shop/
-├── packages/
-│   ├── domain/
-│   ├── data/
-│   ├── presentation/
-│   └── design/
-├── melos.yaml
-└── lib/di.dart
-```
-
-### 4. feature 추가
-
-```bash
-flutter_clean_arch add feature payment --with-ui
-```
-
-### 5. 빌드
-
-```bash
-melos bootstrap
-melos run build:all
-```
-
-### 전체 흐름
-
-```bash
-dart pub global activate flutter_clean_arch_scaffold
-
+# 새 Flutter 프로젝트
 flutter create my_shop
 cd my_shop
 
+# Clean Architecture 구조 복제 + payment 예시 feature
 flutter_clean_arch init
-flutter_clean_arch add feature payment --with-ui
 
+# lib/main.dart 수정 — init이 기존 main.dart를 유지한 경우 필수
+# import 'di.dart'; 추가 후 main() 맨 앞에 configureDependencies(); 호출
+
+# 새 feature 추가 (payment 예시를 참고)
+flutter_clean_arch add feature order --with-ui
+
+# 의존성 설치 + 코드 생성
+dart pub global activate melos
 melos bootstrap
 melos run build:all
+
+# 앱 실행
+flutter run
 ```
 
----
+### `lib/main.dart` 수정 (중요)
 
-## CLI 명령어
-
-### `flutter_clean_arch init`
-
-기존 Flutter 프로젝트에 Clean Architecture 구조를 복제합니다.
-
-| 옵션 | 설명 |
-|------|------|
-| `-f`, `--force` | 기존 파일 덮어쓰기 |
-| `--skip-build` | `build_runner` 생략 |
-
-`lib/main.dart`가 이미 있으면 유지됩니다. 아래를 직접 추가하세요.
+`flutter create` 직후 `init`을 실행하면 **기존 `lib/main.dart`는 유지**됩니다.  
+DI가 동작하려면 아래를 직접 추가해야 합니다.
 
 ```dart
 import 'di.dart';
 
 void main() {
-  configureDependencies();
+  configureDependencies(); // ← runApp()보다 먼저 호출
   runApp(const MainApp());
 }
 ```
 
-### `flutter_clean_arch add feature <name>`
+`init --force`를 쓰면 `main.dart`가 템플릿으로 교체되어 위 코드와 `PaymentPage` 홈 화면이 포함됩니다.
 
-feature 이름(**snake_case**)으로 레이어별 파일을 생성합니다.
+`init`은 **payment 예시 feature**도 함께 생성합니다. 새 feature를 만들 때 이 구조를 참고하세요.
 
-| 옵션 | 설명 |
-|------|------|
-| `--with-ui` | presentation `provider/`, `page/` 생성 |
-| `--with-local` | local datasource 생성 |
-| `--methods` | 메서드 목록 (쉼표 구분) |
-| `--skip-build` | `build_runner` 생략 |
-| `-f`, `--force` | 기존 파일 덮어쓰기 |
-
-```bash
-flutter_clean_arch add feature order --with-ui
-flutter_clean_arch add feature order --methods getOrders,createOrder
+```
+packages/domain/lib/domain/payment/
+packages/data/lib/data/payment/
+packages/presentation/lib/payment/
 ```
 
-#### 생성 후 할 일
+### feature 추가 후 할 일
 
-1. `entity`, `dto` 필드 정의
-2. `datasource` API 구현 (`compute`로 JSON 파싱)
-3. `mapper` dto → entity 변환
-4. `repository impl` 조합
-5. (UI 생성 시) `page` 구현
+- `entity`, `dto` 필드 정의
+- `datasource` API 구현 (`compute`로 JSON 파싱)
+- `mapper` dto → entity 변환
+- `repository impl` 조합
+- (UI 생성 시) `page` 구현
 
-> melos는 의존성을 **추가하지 않습니다.** `pub get`과 코드 생성만 수행합니다.
+> melos는 `pubspec.yaml`에 의존성을 추가하지 않습니다. `bootstrap`은 설치, `build:*`는 코드 생성만 수행합니다.
 
-### melos
+---
+
+## 문제 해결
+
+### `command not found: flutter_clean_arch`
 
 ```bash
-melos bootstrap
-melos run build:all
-melos run build:domain
-melos run build:data
-melos run build:presentation
-melos run build:design
-melos run analyze
+export PATH="$PATH:$HOME/.pub-cache/bin"
+```
+
+`~/.zshrc`에 추가 후 `source ~/.zshrc`
+
+### templates 오류 / 이상한 동작 / 옛 버전이 실행됨
+
+```bash
+dart pub global deactivate flutter_clean_arch_scaffold
+dart pub global activate flutter_clean_arch_scaffold
+```
+
+### PATH 없이 실행
+
+```bash
+dart pub global run flutter_clean_arch_scaffold:flutter_clean_arch init
 ```
 
 ---
@@ -182,19 +140,13 @@ design       → (독립)
 
 ```
 packages/domain/lib/domain/payment/
-├── entity/
-├── repository/
-└── usecase/
+  entity/  repository/  usecase/
 
 packages/data/lib/data/payment/
-├── datasource/
-├── dto/
-├── mapper/
-└── repository/
+  datasource/  dto/  mapper/  repository/
 
 packages/presentation/lib/payment/
-├── provider/
-└── page/
+  provider/  page/
 ```
 
 ### data 레이어 흐름
@@ -205,31 +157,32 @@ API (JSON) → datasource (compute) → dto → mapper → entity → usecase �
 
 ---
 
-## 기여 / 개발
+## pub.dev 문서는 어디에 쓰나
 
-CLI 소스: [`tools/cli/`](tools/cli/)
+| 보이는 곳 | 수정하는 파일 | 내용 |
+|-----------|---------------|------|
+| pub.dev 검색 카드 / 짧은 설명 | `tools/cli/pubspec.yaml` → `description` | 한두 문장 요약 |
+| pub.dev 패키지 페이지 본문 | `tools/cli/README.md` | 설치법, 명령어, 구조 설명 전체 |
+
+README나 `description`을 바꾼 뒤 pub.dev에 반영하려면 **버전을 올리고 재배포**해야 합니다.
 
 ```bash
 cd tools/cli
-dart pub get
-dart pub global activate --source path .
-
-# 이 저장소 루트에서 feature 추가 테스트
-flutter_clean_arch add feature login --with-ui
+dart pub publish
 ```
+
+자세한 배포 절차: [`tools/cli/doc/PUBLISHING.md`](tools/cli/doc/PUBLISHING.md)
 
 ---
 
-## pub.dev 배포
-
-CLI 패키지 배포 가이드: [`tools/cli/doc/PUBLISHING.md`](tools/cli/doc/PUBLISHING.md)
-
-요약:
+## 기여 / 개발
 
 ```bash
 cd tools/cli
-dart pub publish --dry-run   # 검증
-dart pub publish             # 배포
+dart pub global activate --source path .
+
+# 이 저장소 루트에서
+flutter_clean_arch add feature login --with-ui
 ```
 
 ---

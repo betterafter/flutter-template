@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 
+import '../generators/payment_example_writer.dart';
 import '../utils/file_writer.dart';
 import '../utils/paths.dart';
 import '../utils/process_runner.dart';
@@ -61,6 +62,9 @@ class InitCommand extends Command<int> {
     );
     created.add('packages/ (domain, data, presentation, design)');
 
+    await PaymentExampleWriter(writer).write(project, force: force);
+    created.add('payment 예시 feature (domain / data / presentation)');
+
     await writer.copyFile(
       source: p.join(initRoot, 'melos.yaml'),
       destination: project.melos,
@@ -80,6 +84,7 @@ class InitCommand extends Command<int> {
     created.add('pubspec.yaml (path 의존성 추가)');
 
     final mainPath = p.join(project.root, 'lib', 'main.dart');
+    var mainDartPreserved = false;
     if (!File(mainPath).existsSync() || force) {
       await writer.writeFile(
         path: mainPath,
@@ -88,13 +93,22 @@ class InitCommand extends Command<int> {
       );
       created.add('lib/main.dart');
     } else {
-      stdout.writeln(
-        'ℹ lib/main.dart는 기존 파일을 유지했습니다. configureDependencies() 호출을 직접 추가해주세요.',
-      );
+      mainDartPreserved = true;
     }
 
     for (final item in created) {
       stdout.writeln('✓ $item');
+    }
+
+    if (mainDartPreserved) {
+      stdout.writeln('');
+      stdout.writeln('⚠ lib/main.dart는 기존 파일을 유지했습니다.');
+      stdout.writeln('  아래 코드를 lib/main.dart에 추가해주세요:\n');
+      stdout.writeln("  import 'di.dart';\n");
+      stdout.writeln('  void main() {');
+      stdout.writeln('    configureDependencies();');
+      stdout.writeln('    runApp(const MainApp());');
+      stdout.writeln('  }');
     }
 
     if (!skipBuild) {
@@ -109,8 +123,12 @@ class InitCommand extends Command<int> {
       await runner.runBuildRunner(project.root);
     }
 
-    stdout.writeln('\n완료! 다음 명령으로 feature를 추가할 수 있습니다.');
-    stdout.writeln('  flutter_clean_arch add feature payment --with-ui');
+    stdout.writeln('\n완료! payment 예시 구조를 참고해 새 feature를 추가할 수 있습니다.');
+    stdout.writeln('  flutter_clean_arch add feature order --with-ui');
+    stdout.writeln('\n예시 코드 위치:');
+    stdout.writeln('  packages/domain/lib/domain/payment/');
+    stdout.writeln('  packages/data/lib/data/payment/');
+    stdout.writeln('  packages/presentation/lib/payment/');
     if (!skipBuild) {
       stdout.writeln('\n의존성 설치와 코드 생성이 완료되었습니다.');
     } else {
@@ -144,6 +162,7 @@ GetIt configureDependencies() {
   String _mainTemplate(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:presentation/payment/page/payment.page.dart';
 
 import 'di.dart';
 
@@ -159,11 +178,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const ProviderScope(
       child: MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Flutter Clean Architecture'),
-          ),
-        ),
+        home: PaymentPage(),
       ),
     );
   }
