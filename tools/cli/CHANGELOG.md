@@ -1,3 +1,18 @@
+## 0.2.2
+
+- `flutter_clean_arch migrate` 명령 추가
+  - `DataState`, 네트워크 코어, `build.yaml` Retrofit 설정, `data` pubspec 의존성 자동 보완
+  - 완료 후 `flutter pub get` + `build_runner` 실행 (`--skip-build`, `--skip-pub-get` 지원)
+
+## 0.2.1
+
+- `add feature` 실행 시 원격 데이터 레이어 필수 항목 자동 보완
+  - `packages/domain/lib/core/data_state.dart` 없으면 생성
+  - `packages/data/lib/core/network/` 코어 파일 없으면 생성
+  - `packages/data/build.yaml`에 Retrofit builder 설정 없으면 추가
+  - `packages/data/pubspec.yaml`에 `dio`, `retrofit` 등 필수 의존성 없으면 추가
+- 기존 파일은 덮어쓰지 않음 (없는 항목만 추가)
+
 ## 0.2.0
 
 ### 네트워크 레이어 (Dio + Retrofit)
@@ -41,7 +56,7 @@
 4. **feature별** — `{feature}.api.dart` 생성, `RemoteDatasource` / `Repository` / domain `Repository`·`Usecase` / Page 업데이트
 5. **`dart run build_runner build`** — Retrofit `.g.dart` 및 DI 재생성
 
-> 자동 마이그레이션 명령은 아직 없습니다. 추후 `migrate` 명령 추가 예정.
+> `flutter_clean_arch migrate` 명령으로 코어 파일·의존성은 자동 보완됩니다 (0.2.2+).
 
 ## 0.1.4
 

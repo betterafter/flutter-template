@@ -4,6 +4,7 @@ import 'package:args/command_runner.dart';
 
 import 'commands/add_feature_command.dart';
 import 'commands/init_command.dart';
+import 'commands/migrate_command.dart';
 
 class CliRunner extends CommandRunner<int> {
   CliRunner()
@@ -13,6 +14,7 @@ class CliRunner extends CommandRunner<int> {
         ) {
     addCommand(InitCommand());
     addCommand(AddFeatureCommand());
+    addCommand(MigrateCommand());
   }
 
   Future<void> execute(List<String> arguments) async {

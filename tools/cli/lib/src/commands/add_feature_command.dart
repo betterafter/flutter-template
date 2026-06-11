@@ -8,6 +8,7 @@ import '../utils/file_writer.dart';
 import '../utils/name_converter.dart';
 import '../utils/paths.dart';
 import '../utils/process_runner.dart';
+import '../utils/project_prerequisites.dart';
 
 class AddFeatureCommand extends Command<int> {
   AddFeatureCommand() {
@@ -100,6 +101,12 @@ class _AddFeatureSubCommand extends Command<int> {
     }
 
     stdout.writeln('feature "${feature.raw}" 생성 중...\n');
+
+    final prerequisites = await ProjectPrerequisites(writer).ensure(project);
+    if (prerequisites.hasChanges) {
+      printPrerequisitesResult(prerequisites);
+      stdout.writeln('');
+    }
 
     await write(
       project.domainPackage('lib/domain/${feature.fileName}/entity/${feature.fileName}.entity.dart'),

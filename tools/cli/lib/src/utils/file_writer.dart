@@ -17,6 +17,18 @@ class FileWriter {
     await file.writeAsString(content);
   }
 
+  Future<bool> copyFileIfAbsent({
+    required String source,
+    required String destination,
+  }) async {
+    if (File(destination).existsSync()) {
+      return false;
+    }
+
+    await copyFile(source: source, destination: destination, force: true);
+    return true;
+  }
+
   Future<void> copyFile({
     required String source,
     required String destination,
