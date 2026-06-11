@@ -73,6 +73,63 @@ class PubspecEditor {
     await file.writeAsString(editor.toString());
   }
 
+  Future<List<String>> ensureDataPackageDependencies(String pubspecPath) async {
+    final file = File(pubspecPath);
+    if (!file.existsSync()) {
+      throw StateError('pubspec.yaml을 찾을 수 없습니다: $pubspecPath');
+    }
+
+    final editor = YamlEditor(await file.readAsString());
+    final added = <String>[];
+
+    _ensureMap(editor, ['dependencies']);
+    _ensureMap(editor, ['dev_dependencies']);
+
+    const dependencies = {
+      'dio': '^5.7.0',
+      'retrofit': '^4.7.0',
+      'injectable': '^2.5.0',
+      'get_it': '^8.0.3',
+      'build_runner': '^2.6.0',
+      'source_gen': '^4.0.0',
+    };
+
+    const devDependencies = {
+      'injectable_generator': '^2.5.0',
+      'retrofit_generator': '^10.0.0',
+      'build': '^4.0.0',
+      'glob': '^2.1.2',
+    };
+
+    for (final entry in dependencies.entries) {
+      if (_ensureKeyValue(
+        editor,
+        section: 'dependencies',
+        name: entry.key,
+        value: entry.value,
+      )) {
+        added.add(entry.key);
+      }
+    }
+
+    for (final entry in devDependencies.entries) {
+      if (_ensureKeyValue(
+        editor,
+        section: 'dev_dependencies',
+        name: entry.key,
+        value: entry.value,
+      )) {
+        added.add(entry.key);
+      }
+    }
+
+    if (added.isNotEmpty) {
+      await file.writeAsString(editor.toString());
+    }
+
+    return added;
+  }
+
   void _ensureMap(YamlEditor editor, List<String> path) {
     if (_tryParseAt(editor, path) == null) {
       editor.update(path, <String, dynamic>{});
@@ -100,7 +157,7 @@ class PubspecEditor {
     editor.update(keyPath, {'path': path});
   }
 
-  void _ensureKeyValue(
+  bool _ensureKeyValue(
     YamlEditor editor, {
     required String section,
     required String name,
@@ -109,7 +166,9 @@ class PubspecEditor {
     final keyPath = [section, name];
     if (_tryParseAt(editor, keyPath) == null) {
       editor.update(keyPath, value);
+      return true;
     }
+    return false;
   }
 
   Object? _tryParseAt(YamlEditor editor, List<String> path) {

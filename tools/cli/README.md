@@ -113,10 +113,16 @@ Retrofit API → RemoteDatasource → dto → mapper → entity
                                          Usecase → UI
 ```
 
-### 0.1.x → 0.2.0 마이그레이션
+### 0.1.x → 0.2.x 마이그레이션
 
-이전 버전으로 생성한 프로젝트는 네트워크 코어·`DataState`·feature별 Retrofit API를
-수동으로 추가해야 합니다. 상세 단계는 [CHANGELOG.md](CHANGELOG.md#020)를 참고하세요.
+```bash
+flutter_clean_arch migrate
+melos bootstrap   # 또는 packages/data에서 flutter pub get
+melos run build:data
+```
+
+`migrate`는 `DataState`, 네트워크 코어, `data` pubspec 의존성, Retrofit `build.yaml` 설정을
+없는 항목만 추가합니다. 기존 feature의 Repository / API 파일은 수동으로 맞춰야 합니다.
 
 ---
 
@@ -125,10 +131,15 @@ Retrofit API → RemoteDatasource → dto → mapper → entity
 | 명령 | 설명 |
 |------|------|
 | `flutter_clean_arch init` | Clean Architecture 구조 복제 |
+| `flutter_clean_arch migrate` | 0.1.x → 원격 데이터 레이어 마이그레이션 |
+| `flutter_clean_arch migrate --skip-build` | 파일/의존성만 추가 |
 | `flutter_clean_arch add feature <name>` | feature 스캐폴딩 |
 | `flutter_clean_arch add feature <name> --with-ui` | presentation 포함 |
 | `flutter_clean_arch add feature <name> --with-local` | local datasource 포함 |
 | `flutter_clean_arch add feature <name> --methods a,b` | 메서드 stub 지정 |
+
+`add feature` 실행 시 `DataState`, 네트워크 코어 파일, `packages/data/pubspec.yaml` 필수
+의존성이 없으면 자동으로 추가합니다 (기존 파일은 덮어쓰지 않음).
 | `flutter_clean_arch init --force` | 기존 파일 덮어쓰기 |
 | `flutter_clean_arch init --skip-build` | build_runner 생략 |
 
