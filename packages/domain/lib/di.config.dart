@@ -11,6 +11,9 @@
 import 'package:domain/domain/payment/repository/payment.repository.dart'
     as _i30;
 import 'package:domain/domain/payment/usecase/payment.usecase.dart' as _i289;
+import 'package:domain/domain/ranking/repository/ranking.repository.dart'
+    as _i19;
+import 'package:domain/domain/ranking/usecase/ranking.usecase.dart' as _i689;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -25,6 +28,8 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
+    gh.factory<_i689.RankingUsecase>(() =>
+        _i689.RankingUsecase(rankingRepository: gh<_i19.RankingRepository>()));
     gh.factory<_i289.PaymentUsecase>(() =>
         _i289.PaymentUsecase(paymentRepository: gh<_i30.PaymentRepository>()));
     return this;

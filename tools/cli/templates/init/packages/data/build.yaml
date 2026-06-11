@@ -5,6 +5,10 @@ targets:
         enabled: true
         generate_for:
           - lib/data.dart
+      retrofit_generator|retrofit_generator:
+        enabled: true
+        generate_for:
+          - lib/data/**/api/*.dart
 
 builders:
   auto_generator:

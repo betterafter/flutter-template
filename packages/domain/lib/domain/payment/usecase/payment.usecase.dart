@@ -1,3 +1,4 @@
+import 'package:domain/core/data_state.dart';
 import 'package:domain/domain/payment/entity/payment.entity.dart';
 import 'package:domain/domain/payment/repository/payment.repository.dart';
 import 'package:injectable/injectable.dart';
@@ -8,7 +9,7 @@ class PaymentUsecase {
 
   final PaymentRepository paymentRepository;
 
-  Future<List<PaymentEntity>> getPayments() {
+  Future<DataState<List<PaymentEntity>>> getPayments() {
     return paymentRepository.getPayments();
   }
 }

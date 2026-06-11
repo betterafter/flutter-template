@@ -17,6 +17,7 @@ class PaymentExampleWriter {
       project.domainPackage(
         'lib/domain/payment/usecase/payment.usecase.dart',
       ): _usecase,
+      project.dataPackage('lib/data/payment/api/payment.api.dart'): _api,
       project.dataPackage('lib/data/payment/dto/payment.dto.dart'): _dto,
       project.dataPackage(
         'lib/data/payment/dto/payment.dto.parser.dart',
@@ -60,14 +61,16 @@ class PaymentEntity {
 ''';
 
   static const _repository = '''
+import 'package:domain/core/data_state.dart';
 import 'package:domain/domain/payment/entity/payment.entity.dart';
 
 abstract class PaymentRepository {
-  Future<List<PaymentEntity>> getPayments();
+  Future<DataState<List<PaymentEntity>>> getPayments();
 }
 ''';
 
   static const _usecase = '''
+import 'package:domain/core/data_state.dart';
 import 'package:domain/domain/payment/entity/payment.entity.dart';
 import 'package:domain/domain/payment/repository/payment.repository.dart';
 import 'package:injectable/injectable.dart';
@@ -78,9 +81,25 @@ class PaymentUsecase {
 
   final PaymentRepository paymentRepository;
 
-  Future<List<PaymentEntity>> getPayments() {
+  Future<DataState<List<PaymentEntity>>> getPayments() {
     return paymentRepository.getPayments();
   }
+}
+''';
+
+  static const _api = '''
+import 'package:data/data/payment/dto/payment.dto.dart';
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
+
+part 'payment.api.g.dart';
+
+@RestApi()
+abstract class PaymentApi {
+  factory PaymentApi(Dio dio, {String baseUrl}) = _PaymentApi;
+
+  @GET('/api/payments')
+  Future<List<PaymentDto>> getPayments();
 }
 ''';
 
@@ -138,33 +157,26 @@ class PaymentMapper {
 ''';
 
   static const _remoteDatasource = '''
+import 'package:data/data/payment/api/payment.api.dart';
 import 'package:data/data/payment/dto/payment.dto.dart';
-import 'package:data/data/payment/dto/payment.dto.parser.dart';
-import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
 class PaymentRemoteDatasource {
-  PaymentRemoteDatasource();
+  PaymentRemoteDatasource(Dio dio) : _api = PaymentApi(dio);
 
-  Future<List<PaymentDto>> getPayments() async {
-    final jsonList = await _fetchPaymentsJson();
-    return compute(parsePaymentDtoList, jsonList);
-  }
+  final PaymentApi _api;
 
-  Future<List<dynamic>> _fetchPaymentsJson() async {
-    // TODO: HTTP 클라이언트로 API 호출 후 response.body를 jsonDecode
-    return [
-      {'id': '1', 'amount': 10000, 'status': 'completed'},
-      {'id': '2', 'amount': 25000, 'status': 'pending'},
-    ];
-  }
+  Future<List<PaymentDto>> getPayments() => _api.getPayments();
 }
 ''';
 
   static const _repositoryImpl = '''
+import 'package:data/core/network/api_call_handler.dart';
 import 'package:data/data/payment/datasource/payment.remote.datasource.dart';
 import 'package:data/data/payment/mapper/payment.mapper.dart';
+import 'package:domain/core/data_state.dart';
 import 'package:domain/domain/payment/entity/payment.entity.dart';
 import 'package:domain/domain/payment/repository/payment.repository.dart';
 import 'package:injectable/injectable.dart';
@@ -180,9 +192,11 @@ class PaymentRepositoryImpl implements PaymentRepository {
   final PaymentMapper _mapper;
 
   @override
-  Future<List<PaymentEntity>> getPayments() async {
-    final dtos = await _remoteDatasource.getPayments();
-    return _mapper.toEntityList(dtos);
+  Future<DataState<List<PaymentEntity>>> getPayments() {
+    return safeApiCall(() async {
+      final dtos = await _remoteDatasource.getPayments();
+      return _mapper.toEntityList(dtos);
+    });
   }
 }
 ''';
@@ -198,6 +212,7 @@ final paymentUsecaseProvider = Provider<PaymentUsecase>(
 ''';
 
   static const _page = '''
+import 'package:domain/core/data_state.dart';
 import 'package:domain/domain/payment/entity/payment.entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -212,14 +227,22 @@ class PaymentPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Payment')),
-      body: FutureBuilder<List<PaymentEntity>>(
+      body: FutureBuilder<DataState<List<PaymentEntity>>>(
         future: paymentsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final payments = snapshot.data ?? [];
+          final state = snapshot.data;
+          if (state is DataStateError<List<PaymentEntity>>) {
+            return Center(child: Text(state.message ?? '오류가 발생했습니다.'));
+          }
+
+          final payments = state is DataStateSuccess<List<PaymentEntity>>
+              ? state.data
+              : <PaymentEntity>[];
+
           if (payments.isEmpty) {
             return const Center(child: Text('결제 내역이 없습니다.'));
           }

@@ -1,3 +1,4 @@
+import 'package:domain/core/data_state.dart';
 import 'package:domain/domain/payment/entity/payment.entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,14 +13,22 @@ class PaymentPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Payment')),
-      body: FutureBuilder<List<PaymentEntity>>(
+      body: FutureBuilder<DataState<List<PaymentEntity>>>(
         future: paymentsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final payments = snapshot.data ?? [];
+          final state = snapshot.data;
+          if (state is DataStateError<List<PaymentEntity>>) {
+            return Center(child: Text(state.message ?? '오류가 발생했습니다.'));
+          }
+
+          final payments = state is DataStateSuccess<List<PaymentEntity>>
+              ? state.data
+              : <PaymentEntity>[];
+
           if (payments.isEmpty) {
             return const Center(child: Text('결제 내역이 없습니다.'));
           }

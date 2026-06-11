@@ -119,6 +119,12 @@ class _AddFeatureSubCommand extends Command<int> {
     );
 
     await write(
+      project.dataPackage(
+        'lib/data/${feature.fileName}/api/${feature.fileName}.api.dart',
+      ),
+      generator.api(),
+    );
+    await write(
       project.dataPackage('lib/data/${feature.fileName}/dto/${feature.fileName}.dto.dart'),
       generator.dto(),
     );
