@@ -37,8 +37,8 @@ class ProcessRunner {
     final hasFlutter = await _commandExists('flutter');
     final executable = hasFlutter ? 'flutter' : 'dart';
     final arguments = hasFlutter
-        ? ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs']
-        : ['run', 'build_runner', 'build', '--delete-conflicting-outputs'];
+        ? ['pub', 'run', 'build_runner', 'build']
+        : ['run', 'build_runner', 'build'];
 
     await run(
       executable,

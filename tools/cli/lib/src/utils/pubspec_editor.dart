@@ -130,6 +130,62 @@ class PubspecEditor {
     return added;
   }
 
+  Future<List<String>> ensurePresentationPackageDependencies(
+    String pubspecPath,
+  ) async {
+    final file = File(pubspecPath);
+    if (!file.existsSync()) {
+      throw StateError('pubspec.yaml을 찾을 수 없습니다: $pubspecPath');
+    }
+
+    final editor = YamlEditor(await file.readAsString());
+    final added = <String>[];
+
+    _ensureMap(editor, ['dependencies']);
+    _ensureMap(editor, ['dev_dependencies']);
+
+    const dependencies = {
+      'flutter_riverpod': '^2.5.1',
+      'hooks_riverpod': '^2.5.1',
+      'riverpod_annotation': '^2.3.5',
+      'injectable': '^2.5.0',
+      'get_it': '^8.0.3',
+    };
+
+    const devDependencies = {
+      'build_runner': '^2.6.0',
+      'injectable_generator': '^2.5.0',
+    };
+
+    for (final entry in dependencies.entries) {
+      if (_ensureKeyValue(
+        editor,
+        section: 'dependencies',
+        name: entry.key,
+        value: entry.value,
+      )) {
+        added.add(entry.key);
+      }
+    }
+
+    for (final entry in devDependencies.entries) {
+      if (_ensureKeyValue(
+        editor,
+        section: 'dev_dependencies',
+        name: entry.key,
+        value: entry.value,
+      )) {
+        added.add(entry.key);
+      }
+    }
+
+    if (added.isNotEmpty) {
+      await file.writeAsString(editor.toString());
+    }
+
+    return added;
+  }
+
   void _ensureMap(YamlEditor editor, List<String> path) {
     if (_tryParseAt(editor, path) == null) {
       editor.update(path, <String, dynamic>{});

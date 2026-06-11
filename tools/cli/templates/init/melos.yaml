@@ -6,22 +6,22 @@ packages:
 
 scripts:
   build:all:
-    run: melos exec -c 1 -- "flutter pub get && dart run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 -- "flutter pub get && dart run build_runner build"
 
   build:di:
-    run: melos exec -c 1 -- "dart run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 -- "dart run build_runner build"
 
   build:design:
-    run: melos exec -c 1 --scope=design -- "find lib -name 'image.generated.dart' -delete && dart run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 --scope=design -- "find lib -name 'image.generated.dart' -delete && dart run build_runner build"
 
   build:presentation:
-    run: melos exec -c 1 --scope=presentation -- "dart run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 --scope=presentation -- "dart run build_runner build"
 
   build:data:
-    run: melos exec -c 1 --scope=data -- "dart run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 --scope=data -- "dart run build_runner build"
 
   build:domain:
-    run: melos exec -c 1 --scope=domain -- "dart run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 --scope=domain -- "dart run build_runner build"
 
   clean:
     run: melos exec -- flutter clean
