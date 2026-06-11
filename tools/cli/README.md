@@ -97,7 +97,7 @@ packages/domain/lib/domain/payment/
   entity/  repository/  usecase/
 
 packages/data/lib/data/payment/
-  datasource/  dto/  mapper/  repository/
+  api/  datasource/  dto/  mapper/  repository/
 
 packages/presentation/lib/payment/
   provider/  page/
@@ -106,8 +106,17 @@ packages/presentation/lib/payment/
 ### data 레이어 흐름
 
 ```
-API (JSON) → datasource (compute) → dto → mapper → entity → usecase → UI
+Retrofit API → RemoteDatasource → dto → mapper → entity
+                                              ↓
+                                    Repository (remote() → DataState)
+                                              ↓
+                                         Usecase → UI
 ```
+
+### 0.1.x → 0.2.0 마이그레이션
+
+이전 버전으로 생성한 프로젝트는 네트워크 코어·`DataState`·feature별 Retrofit API를
+수동으로 추가해야 합니다. 상세 단계는 [CHANGELOG.md](CHANGELOG.md#020)를 참고하세요.
 
 ---
 
