@@ -173,7 +173,7 @@ class PaymentRemoteDatasource {
 ''';
 
   static const _repositoryImpl = '''
-import 'package:data/core/network/api_call_handler.dart';
+import 'package:data/core/network/remote.dart';
 import 'package:data/data/payment/datasource/payment.remote.datasource.dart';
 import 'package:data/data/payment/mapper/payment.mapper.dart';
 import 'package:domain/core/data_state.dart';
@@ -193,7 +193,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
 
   @override
   Future<DataState<List<PaymentEntity>>> getPayments() {
-    return safeApiCall(() async {
+    return remote(() async {
       final dtos = await _remoteDatasource.getPayments();
       return _mapper.toEntityList(dtos);
     });
@@ -234,29 +234,31 @@ class PaymentPage extends ConsumerWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final state = snapshot.data;
-          if (state is DataStateError<List<PaymentEntity>>) {
-            return Center(child: Text(state.message ?? '오류가 발생했습니다.'));
-          }
+          final state = snapshot.data ?? const DataState.initial();
 
-          final payments = state is DataStateSuccess<List<PaymentEntity>>
-              ? state.data
-              : <PaymentEntity>[];
+          return state.when(
+            initial: () => const Center(child: Text('결제 내역을 불러오는 중입니다.')),
+            loading: (_) => const Center(child: CircularProgressIndicator()),
+            success: (payments) {
+              if (payments.isEmpty) {
+                return const Center(child: Text('결제 내역이 없습니다.'));
+              }
 
-          if (payments.isEmpty) {
-            return const Center(child: Text('결제 내역이 없습니다.'));
-          }
-
-          return ListView.separated(
-            itemCount: payments.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final payment = payments[index];
-              return ListTile(
-                title: Text('\${payment.amount}원'),
-                subtitle: Text(payment.status),
-                trailing: Text(payment.id),
+              return ListView.separated(
+                itemCount: payments.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final payment = payments[index];
+                  return ListTile(
+                    title: Text('\${payment.amount}원'),
+                    subtitle: Text(payment.status),
+                    trailing: Text(payment.id),
+                  );
+                },
               );
+            },
+            error: (error, message, data) {
+              return Center(child: Text(message ?? '오류가 발생했습니다.'));
             },
           );
         },

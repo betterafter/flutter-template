@@ -1,13 +1,13 @@
-import 'package:data/core/network/api_exception.dart';
+import 'package:data/core/network/remote_failure.dart';
 import 'package:dio/dio.dart';
 
 class ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    handler.next(_mapToApiException(err));
+    handler.next(_mapToRemoteFailure(err));
   }
 
-  DioException _mapToApiException(DioException err) {
+  DioException _mapToRemoteFailure(DioException err) {
     final statusCode = err.response?.statusCode;
     final message = _resolveMessage(err);
 
@@ -15,10 +15,10 @@ class ErrorInterceptor extends Interceptor {
       requestOptions: err.requestOptions,
       response: err.response,
       type: err.type,
-      error: ApiException(
+      error: RemoteFailure(
         message: message,
         statusCode: statusCode,
-        originalError: err,
+        cause: err,
       ),
       message: message,
     );

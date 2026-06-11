@@ -1,4 +1,4 @@
-import 'package:data/core/network/api_call_handler.dart';
+import 'package:data/core/network/remote.dart';
 import 'package:data/data/ranking/datasource/ranking.remote.datasource.dart';
 import 'package:data/data/ranking/mapper/ranking.mapper.dart';
 import 'package:domain/core/data_state.dart';
@@ -18,7 +18,7 @@ class RankingRepositoryImpl implements RankingRepository {
 
   @override
   Future<DataState<List<RankingEntity>>> getRankings() {
-    return safeApiCall(() async {
+    return remote(() async {
       final dtos = await _remoteDatasource.getRankings();
       return _mapper.toEntityList(dtos);
     });

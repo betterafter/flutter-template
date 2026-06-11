@@ -148,7 +148,7 @@ ${_localDatasourceMethods()}
 ''');
 
   String repositoryImpl({required bool withLocal}) => render('''
-import 'package:data/core/network/api_call_handler.dart';
+import 'package:data/core/network/remote.dart';
 import 'package:data/data/{{feature}}/datasource/{{feature}}.remote.datasource.dart';
 ${withLocal ? "import 'package:data/data/{{feature}}/datasource/{{feature}}.local.datasource.dart';" : ''}
 import 'package:data/data/{{feature}}/mapper/{{feature}}.mapper.dart';
@@ -204,27 +204,29 @@ class {{className}}Page extends ConsumerWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final state = snapshot.data;
-          if (state is DataStateError<List<{{className}}Entity>>) {
-            return Center(child: Text(state.message ?? '오류가 발생했습니다.'));
-          }
+          final state = snapshot.data ?? const DataState.initial();
 
-          final items = state is DataStateSuccess<List<{{className}}Entity>>
-              ? state.data
-              : <{{className}}Entity>[];
+          return state.when(
+            initial: () => const Center(child: Text('데이터를 불러오는 중입니다.')),
+            loading: (_) => const Center(child: CircularProgressIndicator()),
+            success: (items) {
+              if (items.isEmpty) {
+                return const Center(child: Text('데이터가 없습니다.'));
+              }
 
-          if (items.isEmpty) {
-            return const Center(child: Text('데이터가 없습니다.'));
-          }
-
-          return ListView.separated(
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return ListTile(
-                title: Text(item.id),
+              return ListView.separated(
+                itemCount: items.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return ListTile(
+                    title: Text(item.id),
+                  );
+                },
               );
+            },
+            error: (error, message, data) {
+              return Center(child: Text(message ?? '오류가 발생했습니다.'));
             },
           );
         },
@@ -285,7 +287,7 @@ class {{className}}Page extends ConsumerWidget {
       return '''
   @override
   Future<DataState<List<{{className}}Entity>>> $method() {
-    return safeApiCall(() async {
+    return remote(() async {
       final dtos = await _remoteDatasource.$method();
       return _mapper.toEntityList(dtos);
     });
