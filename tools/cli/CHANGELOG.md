@@ -1,3 +1,17 @@
+## 0.2.4
+
+- `add feature --force` 시 feature 파일뿐 아니라 원격 데이터 레이어 코어 파일도 최신 템플릿으로 덮어쓰기
+  - `DataState`, 네트워크 코어, `module.generator.dart`, `build.yaml` 등
+- `migrate --force` 옵션 추가 (동일한 코어 파일 강제 덮어쓰기)
+
+## 0.2.3
+
+- `migrate` / `add feature` 시 구 프로젝트 호환 보완
+  - `module.generator.dart`에 `.g.dart` export 제외 로직 없으면 템플릿으로 갱신
+  - `presentation/build.yaml` 추가 — `injectable`이 `lib/di.dart`만 처리 (page/provider 빌드 오류 방지)
+  - `presentation/pubspec.yaml`에 `flutter_riverpod` 등 누락 의존성 추가
+- melos `build:all`에서 deprecated `--delete-conflicting-outputs` 제거
+
 ## 0.2.2
 
 - `flutter_clean_arch migrate` 명령 추가

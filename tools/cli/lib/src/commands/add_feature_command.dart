@@ -47,7 +47,7 @@ class _AddFeatureSubCommand extends Command<int> {
       'force',
       abbr: 'f',
       negatable: false,
-      help: '이미 존재하는 파일을 덮어씁니다.',
+      help: 'feature 파일과 원격 데이터 레이어 코어 파일을 최신 템플릿으로 덮어씁니다.',
     );
   }
 
@@ -102,7 +102,8 @@ class _AddFeatureSubCommand extends Command<int> {
 
     stdout.writeln('feature "${feature.raw}" 생성 중...\n');
 
-    final prerequisites = await ProjectPrerequisites(writer).ensure(project);
+    final prerequisites =
+        await ProjectPrerequisites(writer).ensure(project, force: force);
     if (prerequisites.hasChanges) {
       printPrerequisitesResult(prerequisites);
       stdout.writeln('');
@@ -185,7 +186,7 @@ class _AddFeatureSubCommand extends Command<int> {
     }
 
     for (final file in createdFiles) {
-      stdout.writeln('✓ $file');
+      stdout.writeln('${force ? '↻' : '✓'} $file');
     }
 
     if (!skipBuild) {

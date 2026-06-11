@@ -11,6 +11,12 @@ import '../utils/project_prerequisites.dart';
 class MigrateCommand extends Command<int> {
   MigrateCommand() {
     argParser.addFlag(
+      'force',
+      abbr: 'f',
+      negatable: false,
+      help: '원격 데이터 레이어 코어 파일을 최신 템플릿으로 덮어씁니다.',
+    );
+    argParser.addFlag(
       'skip-build',
       negatable: false,
       help: 'pub get 및 build_runner를 실행하지 않습니다.',
@@ -38,12 +44,14 @@ class MigrateCommand extends Command<int> {
       return 1;
     }
 
+    final force = argResults!['force'] as bool;
     final skipBuild = argResults!['skip-build'] as bool;
     final skipPubGet = argResults!['skip-pub-get'] as bool;
 
     stdout.writeln('원격 데이터 레이어 마이그레이션을 시작합니다...\n');
 
-    final result = await ProjectPrerequisites(FileWriter()).ensure(project);
+    final result =
+        await ProjectPrerequisites(FileWriter()).ensure(project, force: force);
     printPrerequisitesResult(result);
     stdout.writeln('');
 

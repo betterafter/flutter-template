@@ -133,6 +133,8 @@ melos run build:data
 | `flutter_clean_arch init` | Clean Architecture 구조 복제 |
 | `flutter_clean_arch migrate` | 0.1.x → 원격 데이터 레이어 마이그레이션 |
 | `flutter_clean_arch migrate --skip-build` | 파일/의존성만 추가 |
+| `flutter_clean_arch add feature <name> --force` | feature + 코어 파일 덮어쓰기 |
+| `flutter_clean_arch migrate --force` | 코어 파일 강제 덮어쓰기 |
 | `flutter_clean_arch add feature <name>` | feature 스캐폴딩 |
 | `flutter_clean_arch add feature <name> --with-ui` | presentation 포함 |
 | `flutter_clean_arch add feature <name> --with-local` | local datasource 포함 |
