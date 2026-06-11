@@ -4,3 +4,6 @@
 export 'package:domain/domain/payment/repository/payment.repository.dart';
 export 'package:domain/domain/payment/entity/payment.entity.dart';
 export 'package:domain/domain/payment/usecase/payment.usecase.dart';
+export 'package:domain/domain/ranking/repository/ranking.repository.dart';
+export 'package:domain/domain/ranking/entity/ranking.entity.dart';
+export 'package:domain/domain/ranking/usecase/ranking.usecase.dart';

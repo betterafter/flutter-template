@@ -35,6 +35,7 @@ class {{className}}Entity {
 ''');
 
   String repository() => render('''
+import 'package:domain/core/data_state.dart';
 import 'package:domain/domain/{{feature}}/entity/{{feature}}.entity.dart';
 
 abstract class {{className}}Repository {
@@ -43,6 +44,7 @@ ${_repositoryMethods()}
 ''');
 
   String usecase() => render('''
+import 'package:domain/core/data_state.dart';
 import 'package:domain/domain/{{feature}}/entity/{{feature}}.entity.dart';
 import 'package:domain/domain/{{feature}}/repository/{{feature}}.repository.dart';
 import 'package:injectable/injectable.dart';
@@ -54,6 +56,21 @@ class {{className}}Usecase {
   final {{className}}Repository {{camelCase}}Repository;
 
 ${_usecaseMethods()}
+}
+''');
+
+  String api() => render('''
+import 'package:data/data/{{feature}}/dto/{{feature}}.dto.dart';
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
+
+part '{{feature}}.api.g.dart';
+
+@RestApi()
+abstract class {{className}}Api {
+  factory {{className}}Api(Dio dio, {String baseUrl}) = _{{className}}Api;
+
+${_apiMethods()}
 }
 ''');
 
@@ -101,14 +118,16 @@ class {{className}}Mapper {
 ''');
 
   String remoteDatasource() => render('''
+import 'package:data/data/{{feature}}/api/{{feature}}.api.dart';
 import 'package:data/data/{{feature}}/dto/{{feature}}.dto.dart';
-import 'package:data/data/{{feature}}/dto/{{feature}}.dto.parser.dart';
-import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
 class {{className}}RemoteDatasource {
-  {{className}}RemoteDatasource();
+  {{className}}RemoteDatasource(Dio dio) : _api = {{className}}Api(dio);
+
+  final {{className}}Api _api;
 
 ${_remoteDatasourceMethods()}
 }
@@ -129,9 +148,11 @@ ${_localDatasourceMethods()}
 ''');
 
   String repositoryImpl({required bool withLocal}) => render('''
+import 'package:data/core/network/remote.dart';
 import 'package:data/data/{{feature}}/datasource/{{feature}}.remote.datasource.dart';
 ${withLocal ? "import 'package:data/data/{{feature}}/datasource/{{feature}}.local.datasource.dart';" : ''}
 import 'package:data/data/{{feature}}/mapper/{{feature}}.mapper.dart';
+import 'package:domain/core/data_state.dart';
 import 'package:domain/domain/{{feature}}/entity/{{feature}}.entity.dart';
 import 'package:domain/domain/{{feature}}/repository/{{feature}}.repository.dart';
 import 'package:injectable/injectable.dart';
@@ -161,54 +182,87 @@ final {{camelCase}}UsecaseProvider = Provider<{{className}}Usecase>(
 ''');
 
   String page() => render('''
+import 'package:domain/core/data_state.dart';
+import 'package:domain/domain/{{feature}}/entity/{{feature}}.entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:presentation/{{feature}}/provider/{{feature}}.provider.dart';
 
 class {{className}}Page extends ConsumerWidget {
   const {{className}}Page({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final stateFuture = ref.read({{camelCase}}UsecaseProvider).${_firstMethod}();
+
     return Scaffold(
       appBar: AppBar(title: Text('{{className}}')),
-      body: const Center(
-        child: Text('{{className}} 화면'),
+      body: FutureBuilder<DataState<List<{{className}}Entity>>>(
+        future: stateFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final state = snapshot.data ?? const DataState.initial();
+
+          return state.when(
+            initial: () => const Center(child: Text('데이터를 불러오는 중입니다.')),
+            loading: (_) => const Center(child: CircularProgressIndicator()),
+            success: (items) {
+              if (items.isEmpty) {
+                return const Center(child: Text('데이터가 없습니다.'));
+              }
+
+              return ListView.separated(
+                itemCount: items.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return ListTile(
+                    title: Text(item.id),
+                  );
+                },
+              );
+            },
+            error: (error, message, data) {
+              return Center(child: Text(message ?? '오류가 발생했습니다.'));
+            },
+          );
+        },
       ),
     );
   }
 }
 ''');
 
+  String get _firstMethod => methods.first;
+
   String _repositoryMethods() {
     return methods.map((method) {
-      return '  Future<List<{{className}}Entity>> $method();';
+      return '  Future<DataState<List<{{className}}Entity>>> $method();';
     }).join('\n');
   }
 
   String _usecaseMethods() {
     return methods.map((method) {
       return '''
-  Future<List<{{className}}Entity>> $method() {
+  Future<DataState<List<{{className}}Entity>>> $method() {
     return {{camelCase}}Repository.$method();
   }''';
     }).join('\n\n');
   }
 
-  String _remoteDatasourceMethods() {
+  String _apiMethods() {
     return methods.map((method) {
-      final fetchMethod = '_fetch${_methodPascalCase(method)}Json';
-      final parser = 'parse{{className}}DtoList';
-      return '''
-  Future<List<{{className}}Dto>> $method() async {
-    final jsonList = await $fetchMethod();
-    return compute($parser, jsonList);
+      return "  @GET('/api/{{feature}}')\n  Future<List<{{className}}Dto>> $method();";
+    }).join('\n\n');
   }
 
-  Future<List<dynamic>> $fetchMethod() async {
-    // TODO: HTTP 클라이언트로 API 호출 후 response.body를 jsonDecode
-    return [];
-  }''';
-    }).join('\n');
+  String _remoteDatasourceMethods() {
+    return methods.map((method) {
+      return '  Future<List<{{className}}Dto>> $method() => _api.$method();';
+    }).join('\n\n');
   }
 
   String _localDatasourceMethods() {
@@ -230,19 +284,13 @@ class {{className}}Page extends ConsumerWidget {
 
   String _repositoryImplMethods({required bool withLocal}) {
     return methods.map((method) {
-      if (withLocal) {
-        return '''
-  @override
-  Future<List<{{className}}Entity>> $method() async {
-    final dtos = await _remoteDatasource.$method();
-    return _mapper.toEntityList(dtos);
-  }''';
-      }
       return '''
   @override
-  Future<List<{{className}}Entity>> $method() async {
-    final dtos = await _remoteDatasource.$method();
-    return _mapper.toEntityList(dtos);
+  Future<DataState<List<{{className}}Entity>>> $method() {
+    return remote(() async {
+      final dtos = await _remoteDatasource.$method();
+      return _mapper.toEntityList(dtos);
+    });
   }''';
     }).join('\n\n');
   }
