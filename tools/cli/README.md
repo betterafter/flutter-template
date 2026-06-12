@@ -65,13 +65,13 @@ dart pub global run flutter_clean_arch_scaffold:fca migrate
 
 # 덮어쓰기 필요 시
 dart pub global run flutter_clean_arch_scaffold:fca migrate --force
-```
 
-migrate 완료 후에는 프로젝트 루트에서:
-
-```bash
+# migrate 완료 후에는 프로젝트 루트에서:
 tool/fca build
-tool/fca migrate          # 이후부터는 짧은 명령 가능
+
+# 이후부터는 짧은 명령 가능
+tool/fca migrate   
+tool/fca build
 ```
 
 파일만 보완하고 빌드는 직접 할 때:
