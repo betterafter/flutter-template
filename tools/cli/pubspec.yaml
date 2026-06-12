@@ -3,7 +3,7 @@ description: >
   Flutter Clean Architecture 스캐폴딩 CLI. Dio·Retrofit·DataState 기반 원격 데이터
   레이어와 payment 예시 feature를 `init`으로 생성하고, `add feature`로 새 feature를
   추가합니다.
-version: 0.2.15
+version: 0.2.17
 homepage: https://github.com/betterafter/flutter-template
 repository: https://github.com/betterafter/flutter-template
 issue_tracker: https://github.com/betterafter/flutter-template/issues

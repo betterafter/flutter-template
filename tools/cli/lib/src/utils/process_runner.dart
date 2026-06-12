@@ -91,7 +91,9 @@ class ProcessRunner {
     );
   }
 
-  /// 기본은 build_runner AOT. Windows에서 AOT 실패 시에만 --force-jit 재시도.
+  /// Flutter 프로젝트에서는 `flutter pub run build_runner` 사용.
+  /// Windows에서 PATH의 `dart`가 Flutter SDK와 다르면 `dart run`이 실패할 수 있음.
+  /// 기본은 AOT. Windows AOT 실패 시에만 --force-jit 재시도.
   Future<void> runBuildRunner(
     String packagePath, {
     bool clean = false,
@@ -103,14 +105,20 @@ class ProcessRunner {
 
     await runPubGet(packagePath);
 
+    final useFlutter = await _commandExists('flutter');
+
     if (forceJit) {
-      await _runBuildRunner(packagePath, forceJit: true);
+      await _runBuildRunner(
+        packagePath,
+        forceJit: true,
+        useFlutter: useFlutter,
+      );
       return;
     }
 
     final succeeded = await run(
-      'dart',
-      _buildRunnerArgs(forceJit: false),
+      _buildRunnerExecutable(useFlutter),
+      _buildRunnerArgs(forceJit: false, useFlutter: useFlutter),
       workingDirectory: packagePath,
     );
 
@@ -123,7 +131,11 @@ class ProcessRunner {
         '→ AOT 빌드 실패, --force-jit으로 재시도 (${p.basename(packagePath)})...',
       );
       await clearBuildRunnerCache(packagePath);
-      await _runBuildRunner(packagePath, forceJit: true);
+      await _runBuildRunner(
+        packagePath,
+        forceJit: true,
+        useFlutter: useFlutter,
+      );
       return;
     }
 
@@ -135,16 +147,33 @@ class ProcessRunner {
   Future<void> _runBuildRunner(
     String packagePath, {
     required bool forceJit,
+    required bool useFlutter,
   }) async {
     await run(
-      'dart',
-      _buildRunnerArgs(forceJit: forceJit),
+      _buildRunnerExecutable(useFlutter),
+      _buildRunnerArgs(forceJit: forceJit, useFlutter: useFlutter),
       workingDirectory: packagePath,
       required: true,
     );
   }
 
-  List<String> _buildRunnerArgs({required bool forceJit}) {
+  String _buildRunnerExecutable(bool useFlutter) =>
+      useFlutter ? 'flutter' : 'dart';
+
+  List<String> _buildRunnerArgs({
+    required bool forceJit,
+    required bool useFlutter,
+  }) {
+    if (useFlutter) {
+      return [
+        'pub',
+        'run',
+        'build_runner',
+        'build',
+        if (forceJit) '--force-jit',
+      ];
+    }
+
     return [
       'run',
       'build_runner',
@@ -160,9 +189,12 @@ class ProcessRunner {
       await buildDir.delete(recursive: true);
     }
 
+    final useFlutter = await _commandExists('flutter');
     await run(
-      'dart',
-      ['run', 'build_runner', 'clean'],
+      _buildRunnerExecutable(useFlutter),
+      useFlutter
+          ? ['pub', 'run', 'build_runner', 'clean']
+          : ['run', 'build_runner', 'clean'],
       workingDirectory: packagePath,
     );
   }

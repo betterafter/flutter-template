@@ -1,3 +1,13 @@
+## 0.2.17
+
+- `migrate`: `dart run build_runner`가 남아 있으면 melos.yaml 갱신
+
+## 0.2.16
+
+- `tool/fca build`: Flutter 프로젝트에서 `flutter pub run build_runner` 사용
+  - Windows에서 PATH `dart`와 Flutter SDK 불일치 시 `dart run` 실패 방지
+- melos.yaml: `dart run build_runner` → `flutter pub run build_runner`
+
 ## 0.2.15
 
 - `tool/fca build`: Mac/Linux는 기본 AOT, **Windows AOT 실패 시에만** `--force-jit` 자동 재시도
