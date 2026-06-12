@@ -13,7 +13,7 @@ Flutter Clean Architecture를 **CLI로 프로젝트에 복제**하는 템플릿�
 | **새 프로젝트 시작** | `dart pub global run flutter_clean_arch_scaffold:fca init` |
 | **구버전 / 누락 파일 보완** | `tool/fca migrate` |
 | **feature 추가** | `tool/fca add feature order --with-ui` |
-| **파일 수정 후 코드 재생성** | `tool/fca build` |
+| **파일 수정 후 코드 재생성** | `tool/fca build` (전체) / `tool/fca build --scope data` (레이어별) |
 | **앱 실행** | `flutter run` |
 
 > Windows: `tool/fca` → `tool\fca` (또는 `tool\fca.bat`)

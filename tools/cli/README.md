@@ -86,9 +86,26 @@ init 이후 프로젝트 루트에서 `tool/fca` 사용 (Windows: `tool\fca`).
 | `tool/fca migrate` | 누락된 필수 파일·설정 보완 |
 | `tool/fca migrate --force` | 코어 파일·melos·di·tool/fca 덮어쓰기 |
 | `tool/fca add feature <name> --with-ui` | feature 스캐폴딩 |
-| `tool/fca build` | 전체 코드 생성 |
-| `tool/fca build --scope data` | data 패키지만 |
+| `tool/fca build` | 전체 코드 생성 (기본값) |
+| `tool/fca build --scope <레이어>` | 레이어별 코드 생성 |
 | `tool/fca bootstrap` | 멀티 패키지 `pub get` |
+
+**`build --scope` 값** (`-s` 축약 가능)
+
+| scope | 대상 |
+|-------|------|
+| `all` | design + domain + data + presentation + root DI (기본값) |
+| `domain` | `packages/domain` |
+| `data` | `packages/data` |
+| `presentation` | `packages/presentation` |
+| `design` | `packages/design` |
+| `di` | 루트 `lib/di.config.dart` |
+
+```bash
+tool/fca build                      # 전체
+tool/fca build --scope data         # data만
+tool/fca build -s presentation      # presentation만
+```
 
 feature 이름: **snake_case** (예: `payment`, `user_profile`)
 

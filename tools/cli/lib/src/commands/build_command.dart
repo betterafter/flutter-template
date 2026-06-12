@@ -20,7 +20,8 @@ class BuildCommand extends Command<int> {
   String get name => 'build';
 
   @override
-  String get description => 'build_runner 코드 생성 (melos build:* 대체)';
+  String get description =>
+      'build_runner 코드 생성. --scope 생략 시 전체(all)';
 
   @override
   Future<int> run() async {
