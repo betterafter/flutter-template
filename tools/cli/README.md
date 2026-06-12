@@ -71,7 +71,7 @@ tool/fca build
 
 # 이후부터는 짧은 명령 가능
 tool/fca migrate   
-tool/fca build
+
 ```
 
 파일만 보완하고 빌드는 직접 할 때:
