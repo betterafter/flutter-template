@@ -114,6 +114,8 @@ project/
 |------|------|
 | init 전 명령 안 됨 | `dart pub global run flutter_clean_arch_scaffold:fca init` |
 | init 후 명령 안 됨 | `tool\fca.bat` (Windows) / 프로젝트 루트에서 실행 |
+| Windows `.g.dart` 실패 / `build.dart.aot` | `tool\fca build` (실패 시 자동 `--force-jit`) 또는 `C:\dev\...`로 이동 |
+| 옛 melos.yaml | `tool/fca migrate` |
 | CLI 이상 | `dart pub global deactivate flutter_clean_arch_scaffold` 후 재설치 |
 
 ---

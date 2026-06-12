@@ -150,6 +150,26 @@ API → datasource → dto → mapper → entity → usecase → UI
 
 ## 문제 해결
 
+### Windows — `.g.dart` 안 생김 / `build.dart.aot` 오류
+
+build_runner **2.15+**는 기본 **AOT**입니다. Mac/Linux는 그대로 동작합니다.  
+Windows **OneDrive · 한글 경로**에서만 AOT 실패가 날 수 있습니다.
+
+`tool/fca build` 동작:
+
+1. 기본: `dart run build_runner build` (Mac과 동일)
+2. Windows에서 실패 시: 자동으로 `--force-jit` 재시도
+3. 수동: `tool\fca build --force-jit`
+
+```powershell
+tool\fca build
+tool\fca build --force-jit --scope data
+```
+
+**근본 해결** — `C:\dev\my_app` 등 OneDrive 밖 ASCII 경로로 이동.
+
+Windows에서 `melos run build:*`가 실패하면 **`tool/fca build` 사용**을 권장합니다.
+
 **`tool/fca`를 찾을 수 없음**
 
 - init 전: `dart pub global run flutter_clean_arch_scaffold:fca init`

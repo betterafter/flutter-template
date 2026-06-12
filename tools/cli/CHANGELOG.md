@@ -1,3 +1,13 @@
+## 0.2.15
+
+- `tool/fca build`: Mac/Linux는 기본 AOT, **Windows AOT 실패 시에만** `--force-jit` 자동 재시도
+- `tool/fca build --force-jit` 옵션 추가 (수동 강제)
+- melos.yaml은 기본 `dart run build_runner build` 유지 (Mac 동작 보존)
+
+## 0.2.14
+
+- (미배포) Windows 전역 `--force-jit` — 0.2.15에서 플랫폼별 전략으로 변경
+
 ## 0.2.11
 
 - README: `tool/fca` 없을 때 migrate는 `dart pub global run ... fca migrate` 사용 안내

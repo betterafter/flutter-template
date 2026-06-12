@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+
 class ProcessRunner {
   Future<bool> run(
     String executable,
@@ -69,23 +71,114 @@ class ProcessRunner {
     );
   }
 
-  Future<void> runBuildRunner(String packagePath) async {
+  Future<void> runPubGet(String packagePath) async {
     final hasFlutter = await _commandExists('flutter');
-    final executable = hasFlutter ? 'flutter' : 'dart';
-    final arguments = hasFlutter
-        ? ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs']
-        : ['run', 'build_runner', 'build', '--delete-conflicting-outputs'];
+    if (hasFlutter) {
+      await run(
+        'flutter',
+        ['pub', 'get'],
+        workingDirectory: packagePath,
+        required: true,
+      );
+      return;
+    }
 
     await run(
-      executable,
-      arguments,
+      'dart',
+      ['pub', 'get'],
+      workingDirectory: packagePath,
+      required: true,
+    );
+  }
+
+  /// 기본은 build_runner AOT. Windows에서 AOT 실패 시에만 --force-jit 재시도.
+  Future<void> runBuildRunner(
+    String packagePath, {
+    bool clean = false,
+    bool forceJit = false,
+  }) async {
+    if (clean) {
+      await clearBuildRunnerCache(packagePath);
+    }
+
+    await runPubGet(packagePath);
+
+    if (forceJit) {
+      await _runBuildRunner(packagePath, forceJit: true);
+      return;
+    }
+
+    final succeeded = await run(
+      'dart',
+      _buildRunnerArgs(forceJit: false),
+      workingDirectory: packagePath,
+    );
+
+    if (succeeded) {
+      return;
+    }
+
+    if (Platform.isWindows) {
+      stdout.writeln(
+        '→ AOT 빌드 실패, --force-jit으로 재시도 (${p.basename(packagePath)})...',
+      );
+      await clearBuildRunnerCache(packagePath);
+      await _runBuildRunner(packagePath, forceJit: true);
+      return;
+    }
+
+    throw StateError(
+      'build_runner build 실패: ${p.basename(packagePath)}',
+    );
+  }
+
+  Future<void> _runBuildRunner(
+    String packagePath, {
+    required bool forceJit,
+  }) async {
+    await run(
+      'dart',
+      _buildRunnerArgs(forceJit: forceJit),
+      workingDirectory: packagePath,
+      required: true,
+    );
+  }
+
+  List<String> _buildRunnerArgs({required bool forceJit}) {
+    return [
+      'run',
+      'build_runner',
+      'build',
+      if (forceJit) '--force-jit',
+    ];
+  }
+
+  Future<void> clearBuildRunnerCache(String packagePath) async {
+    final buildDir = Directory(p.join(packagePath, '.dart_tool', 'build'));
+    if (buildDir.existsSync()) {
+      stdout.writeln('→ .dart_tool/build 삭제 (${p.basename(packagePath)})');
+      await buildDir.delete(recursive: true);
+    }
+
+    await run(
+      'dart',
+      ['run', 'build_runner', 'clean'],
       workingDirectory: packagePath,
     );
   }
 
   Future<bool> _commandExists(String command) async {
-    final lookup = Platform.isWindows ? 'where' : 'which';
-    final result = await Process.run(lookup, [command], runInShell: true);
+    if (Platform.isWindows) {
+      final result = await Process.run(
+        'where.exe',
+        [command],
+        runInShell: false,
+      );
+      return result.exitCode == 0 &&
+          result.stdout.toString().trim().isNotEmpty;
+    }
+
+    final result = await Process.run('which', [command], runInShell: true);
     return result.exitCode == 0;
   }
 }
