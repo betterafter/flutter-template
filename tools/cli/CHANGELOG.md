@@ -1,3 +1,8 @@
+## 0.2.5
+
+- melos `build:*` 및 CLI `build_runner` 실행 시 `--delete-conflicting-outputs` 기본 적용
+  - init 템플릿 `melos.yaml` 포함
+
 ## 0.2.4
 
 - `add feature --force` 시 feature 파일뿐 아니라 원격 데이터 레이어 코어 파일도 최신 템플릿으로 덮어쓰기
