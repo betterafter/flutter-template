@@ -17,33 +17,33 @@ Flutter Clean Architecture 구조를 **기존 Flutter 프로젝트에 복제**�
 아래를 **위에서부터 순서대로** 실행하세요.
 
 ```bash
-# CLI 설치 (최초 1회)
+# 1. CLI 설치 (PC당 최초 1회)
 dart pub global activate flutter_clean_arch_scaffold
 
-# PATH 설정 (~/.pub-cache/bin)
-export PATH="$PATH:$HOME/.pub-cache/bin"
-
-# 새 Flutter 프로젝트
+# 2. 새 Flutter 프로젝트
 flutter create my_app
 cd my_app
 
-# Clean Architecture 구조 복제 + payment 예시 feature
+# 3. 구조 생성 + payment 예시 + melos.yaml + bootstrap + 코드 생성
 flutter_clean_arch init
 
 # lib/main.dart 수정 — init이 기존 main.dart를 유지한 경우 필수
 # import 'di.dart'; 추가 후 main() 맨 앞에 configureDependencies(); 호출
 
-# 새 feature 추가 (payment 예시를 참고)
+# 4. 새 feature 추가 (payment 예시를 참고)
 flutter_clean_arch add feature order --with-ui
 
-# 의존성 설치 + 코드 생성
-dart pub global activate melos
-melos bootstrap
-melos run build:all
-
-# 앱 실행
+# 5. 앱 실행
 flutter run
 ```
+
+> `init` / `add feature`는 기본적으로 `melos bootstrap`과 `build_runner`까지 자동 실행합니다.  
+> `--skip-build`를 썼을 때만 아래를 직접 실행하세요.
+>
+> ```bash
+> melos bootstrap
+> melos run build:all
+> ```
 
 ### `lib/main.dart` 수정 (중요)
 
@@ -139,11 +139,11 @@ melos run build:data
 | `flutter_clean_arch add feature <name> --with-ui` | presentation 포함 |
 | `flutter_clean_arch add feature <name> --with-local` | local datasource 포함 |
 | `flutter_clean_arch add feature <name> --methods a,b` | 메서드 stub 지정 |
+| `flutter_clean_arch init --force` | 기존 파일 덮어쓰기 |
+| `flutter_clean_arch init --skip-build` | build_runner 생략 |
 
 `add feature` 실행 시 `DataState`, 네트워크 코어 파일, `packages/data/pubspec.yaml` 필수
 의존성이 없으면 자동으로 추가합니다 (기존 파일은 덮어쓰지 않음).
-| `flutter_clean_arch init --force` | 기존 파일 덮어쓰기 |
-| `flutter_clean_arch init --skip-build` | build_runner 생략 |
 
 feature 이름: **snake_case** (예: `payment`, `user_profile`)
 
@@ -151,13 +151,15 @@ feature 이름: **snake_case** (예: `payment`, `user_profile`)
 
 ## 문제 해결
 
-### `command not found: flutter_clean_arch`
+### `command not found: flutter_clean_arch` / `melos`
+
+`dart pub global activate`는 했는데 단축 명령이 안 되면 PATH 문제입니다.  
+그때만 아래 형식으로 실행하세요.
 
 ```bash
-export PATH="$PATH:$HOME/.pub-cache/bin"
+dart pub global run flutter_clean_arch_scaffold:flutter_clean_arch init
+dart pub global run melos:melos run build:all
 ```
-
-영구 적용: `~/.zshrc`에 위 줄 추가 후 `source ~/.zshrc`
 
 ### templates 오류 / 이상한 동작 / 옛 버전이 실행됨
 
@@ -166,12 +168,6 @@ CLI 캐시를 지우고 재설치하세요.
 ```bash
 dart pub global deactivate flutter_clean_arch_scaffold
 dart pub global activate flutter_clean_arch_scaffold
-```
-
-### PATH 없이 실행
-
-```bash
-dart pub global run flutter_clean_arch_scaffold:flutter_clean_arch init
 ```
 
 ---

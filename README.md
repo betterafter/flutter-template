@@ -17,31 +17,23 @@ entity · repository · usecase · datasource · dto · mapper · provider · pa
 아래를 **위에서부터 순서대로** 실행하세요.
 
 ```bash
-# CLI 설치 (최초 1회)
+# 1. CLI 설치 (PC당 최초 1회)
 dart pub global activate flutter_clean_arch_scaffold
 
-# PATH 설정
-export PATH="$PATH:$HOME/.pub-cache/bin"
-
-# 새 Flutter 프로젝트
+# 2. 새 Flutter 프로젝트
 flutter create my_shop
 cd my_shop
 
-# Clean Architecture 구조 복제 + payment 예시 feature
+# 3. 구조 생성 + payment 예시 + melos.yaml + bootstrap + 코드 생성
 flutter_clean_arch init
 
 # lib/main.dart 수정 — init이 기존 main.dart를 유지한 경우 필수
 # import 'di.dart'; 추가 후 main() 맨 앞에 configureDependencies(); 호출
 
-# 새 feature 추가 (payment 예시를 참고)
+# 4. 새 feature 추가 (payment 예시를 참고)
 flutter_clean_arch add feature order --with-ui
 
-# 의존성 설치 + 코드 생성
-dart pub global activate melos
-melos bootstrap
-melos run build:all
-
-# 앱 실행
+# 5. 앱 실행
 flutter run
 ```
 
@@ -77,31 +69,28 @@ packages/presentation/lib/payment/
 - `repository impl` 조합
 - (UI 생성 시) `page` 구현
 
-> melos는 `pubspec.yaml`에 의존성을 추가하지 않습니다. `bootstrap`은 설치, `build:*`는 코드 생성만 수행합니다.
+> `melos.yaml`은 `init`이 생성하는 설정 파일이고, `melos`는 별도 CLI입니다.  
+> `init`이 `melos` 설치·`bootstrap`·코드 생성까지 처리하므로, 보통 README에서 melos를 따로 실행할 필요는 없습니다.
 
 ---
 
 ## 문제 해결
 
-### `command not found: flutter_clean_arch`
+### `command not found: flutter_clean_arch` / `melos`
+
+`dart pub global activate`는 했는데 단축 명령이 안 되면 PATH 문제입니다.  
+그때만 아래 형식으로 실행하세요.
 
 ```bash
-export PATH="$PATH:$HOME/.pub-cache/bin"
+dart pub global run flutter_clean_arch_scaffold:flutter_clean_arch init
+dart pub global run melos:melos run build:all
 ```
-
-`~/.zshrc`에 추가 후 `source ~/.zshrc`
 
 ### templates 오류 / 이상한 동작 / 옛 버전이 실행됨
 
 ```bash
 dart pub global deactivate flutter_clean_arch_scaffold
 dart pub global activate flutter_clean_arch_scaffold
-```
-
-### PATH 없이 실행
-
-```bash
-dart pub global run flutter_clean_arch_scaffold:flutter_clean_arch init
 ```
 
 ---
