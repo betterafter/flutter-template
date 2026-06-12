@@ -3,74 +3,135 @@ import 'dart:io';
 import 'package:yaml_edit/yaml_edit.dart';
 
 class PubspecEditor {
-  Future<void> ensureCleanArchDependencies(String pubspecPath) async {
+  Future<List<String>> ensureCleanArchDependencies(String pubspecPath) async {
     final file = File(pubspecPath);
     if (!file.existsSync()) {
       throw StateError('pubspec.yaml을 찾을 수 없습니다: $pubspecPath');
     }
 
     final editor = YamlEditor(await file.readAsString());
+    final added = <String>[];
 
     _ensureMap(editor, ['dependencies']);
     _ensureMap(editor, ['dev_dependencies']);
 
-    _ensurePathDependency(
+    if (_ensurePathDependency(
       editor,
       section: 'dependencies',
       name: 'domain',
       path: './packages/domain',
-    );
-    _ensurePathDependency(
+    )) {
+      added.add('domain');
+    }
+    if (_ensurePathDependency(
       editor,
       section: 'dependencies',
       name: 'data',
       path: './packages/data',
-    );
-    _ensurePathDependency(
+    )) {
+      added.add('data');
+    }
+    if (_ensurePathDependency(
       editor,
       section: 'dependencies',
       name: 'presentation',
       path: './packages/presentation',
-    );
-    _ensureKeyValue(
-      editor,
-      section: 'dependencies',
-      name: 'injectable',
-      value: '^2.5.0',
-    );
-    _ensureKeyValue(
-      editor,
-      section: 'dependencies',
-      name: 'get_it',
-      value: '^8.0.3',
-    );
-    _ensureKeyValue(
-      editor,
-      section: 'dependencies',
-      name: 'flutter_riverpod',
-      value: '^2.5.1',
-    );
+    )) {
+      added.add('presentation');
+    }
 
-    _ensureKeyValue(
-      editor,
-      section: 'dev_dependencies',
-      name: 'build_runner',
-      value: '^2.4.12',
-    );
-    _ensureKeyValue(
-      editor,
-      section: 'dev_dependencies',
-      name: 'melos',
-      value: '^6.3.2',
-    );
-    _ensureKeyValue(
-      editor,
-      section: 'dev_dependencies',
-      name: 'injectable_generator',
-      value: '^2.5.0',
-    );
+    const rootDependencies = {
+      'injectable': '^2.5.0',
+      'get_it': '^8.0.3',
+      'flutter_riverpod': '^2.5.1',
+    };
+    const rootDevDependencies = {
+      'build_runner': '^2.4.12',
+      'melos': '^6.3.2',
+      'injectable_generator': '^2.5.0',
+    };
 
-    await file.writeAsString(editor.toString());
+    for (final entry in rootDependencies.entries) {
+      if (_ensureKeyValue(
+        editor,
+        section: 'dependencies',
+        name: entry.key,
+        value: entry.value,
+      )) {
+        added.add(entry.key);
+      }
+    }
+
+    for (final entry in rootDevDependencies.entries) {
+      if (_ensureKeyValue(
+        editor,
+        section: 'dev_dependencies',
+        name: entry.key,
+        value: entry.value,
+      )) {
+        added.add(entry.key);
+      }
+    }
+
+    if (added.isNotEmpty) {
+      await file.writeAsString(editor.toString());
+    }
+
+    return added;
+  }
+
+  Future<List<String>> ensureDomainPackageDependencies(String pubspecPath) async {
+    final file = File(pubspecPath);
+    if (!file.existsSync()) {
+      throw StateError('pubspec.yaml을 찾을 수 없습니다: $pubspecPath');
+    }
+
+    final editor = YamlEditor(await file.readAsString());
+    final added = <String>[];
+
+    _ensureMap(editor, ['dependencies']);
+    _ensureMap(editor, ['dev_dependencies']);
+
+    const dependencies = {
+      'injectable': '^2.5.0',
+      'get_it': '^8.0.3',
+    };
+
+    const devDependencies = {
+      'build_runner': '^2.4.12',
+      'build': '^2.4.0',
+      'glob': '^2.1.2',
+      'source_gen': '^1.4.0',
+      'injectable_generator': '^2.5.0',
+    };
+
+    for (final entry in dependencies.entries) {
+      if (_ensureKeyValue(
+        editor,
+        section: 'dependencies',
+        name: entry.key,
+        value: entry.value,
+      )) {
+        added.add(entry.key);
+      }
+    }
+
+    for (final entry in devDependencies.entries) {
+      if (_ensureKeyValue(
+        editor,
+        section: 'dev_dependencies',
+        name: entry.key,
+        value: entry.value,
+      )) {
+        added.add(entry.key);
+      }
+    }
+
+    if (added.isNotEmpty) {
+      await file.writeAsString(editor.toString());
+    }
+
+    return added;
   }
 
   Future<List<String>> ensureDataPackageDependencies(String pubspecPath) async {
@@ -192,7 +253,7 @@ class PubspecEditor {
     }
   }
 
-  void _ensurePathDependency(
+  bool _ensurePathDependency(
     YamlEditor editor, {
     required String section,
     required String name,
@@ -203,14 +264,15 @@ class PubspecEditor {
 
     if (existing == null) {
       editor.update(keyPath, {'path': path});
-      return;
+      return true;
     }
 
     if (existing is Map && existing['path'] == path) {
-      return;
+      return false;
     }
 
     editor.update(keyPath, {'path': path});
+    return true;
   }
 
   bool _ensureKeyValue(

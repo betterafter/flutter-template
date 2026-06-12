@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 
 import 'commands/add_feature_command.dart';
+import 'commands/bootstrap_command.dart';
+import 'commands/build_command.dart';
 import 'commands/init_command.dart';
 import 'commands/migrate_command.dart';
 
@@ -14,6 +16,8 @@ class CliRunner extends CommandRunner<int> {
         ) {
     addCommand(InitCommand());
     addCommand(AddFeatureCommand());
+    addCommand(BootstrapCommand());
+    addCommand(BuildCommand());
     addCommand(MigrateCommand());
   }
 

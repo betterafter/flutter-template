@@ -1,3 +1,16 @@
+## 0.2.8
+
+- `migrate` 보강: `melos.yaml`, `tool/fca`, `lib/di.dart`, domain `build.yaml`, 루트/domain pubspec 의존성 자동 보완
+- `migrate` 완료 후 전체 패키지 `bootstrap` + 코드 생성
+- `fca` 글로벌 실행 이름 추가, `build` / `bootstrap` CLI 명령 추가
+- README 사용법 단순화 (시나리오별 명령 표, migrate를 사용 방법에 통합)
+
+## 0.2.7
+
+- Windows 호환: `init` 내부 `melos bootstrap`을 `dart pub global run`으로 실행 (PATH 불필요)
+- Windows에서 `flutter` 명령 탐지 시 `where` 사용
+- README: Windows에서 동작하는 `dart pub global run` 명령을 기본 가이드로 변경
+
 ## 0.2.6
 
 - README 사용법 정리

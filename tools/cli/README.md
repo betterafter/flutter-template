@@ -1,67 +1,96 @@
 # flutter_clean_arch_scaffold
 
-Flutter Clean Architecture 구조를 **기존 Flutter 프로젝트에 복제**하는 CLI입니다.
+Flutter Clean Architecture 멀티 패키지 구조를 기존 프로젝트에 복제하는 CLI입니다.
 
-`flutter_clean_arch init` 한 번으로:
-
-- `packages/domain`, `data`, `presentation`, `design`과 `melos.yaml` 생성
-- **`payment` 예시 feature** 자동 생성 (entity · dto · mapper · datasource · usecase · provider · page)
-- `android/`, `ios/` 설정은 건드리지 않음
-
-새 feature는 `payment` 폴더 구조를 보고 `add feature`로 추가합니다.
+`init` 한 번으로 `domain` / `data` / `presentation` / `design` + **payment 예시 feature** + `tool/fca` 래퍼가 생성됩니다.
 
 ---
 
-## 사용 방법
+## 무엇을 쓰면 되나
 
-아래를 **위에서부터 순서대로** 실행하세요.
+| 상황 | 명령 |
+|------|------|
+| **처음 설치** (PC당 1회) | `dart pub global activate flutter_clean_arch_scaffold` |
+| **새 프로젝트 시작** (`tool/fca` 없을 때) | `dart pub global run flutter_clean_arch_scaffold:fca init` |
+| **구버전 / 누락 파일 보완** | `tool/fca migrate` |
+| **feature 추가** | `tool/fca add feature order --with-ui` |
+| **파일 수정 후 코드 재생성** | `tool/fca build` |
+| **앱 실행** | `flutter run` |
+
+> Windows는 `tool/fca` 대신 `tool\fca` (또는 `tool\fca.bat`)를 사용하세요.
+
+---
+
+## 1. 신규 프로젝트
 
 ```bash
-# 1. CLI 설치 (PC당 최초 1회)
+# PC당 1회
 dart pub global activate flutter_clean_arch_scaffold
 
-# 2. 새 Flutter 프로젝트
 flutter create my_app
 cd my_app
 
-# 3. 구조 생성 + payment 예시 + melos.yaml + bootstrap + 코드 생성
-flutter_clean_arch init
-
-# lib/main.dart 수정 — init이 기존 main.dart를 유지한 경우 필수
-# import 'di.dart'; 추가 후 main() 맨 앞에 configureDependencies(); 호출
-
-# 4. 새 feature 추가 (payment 예시를 참고)
-flutter_clean_arch add feature order --with-ui
-
-# 5. 앱 실행
-flutter run
+# init 전에만 긴 명령 (이후 tool/fca 생성됨)
+dart pub global run flutter_clean_arch_scaffold:fca init
 ```
 
-> `init` / `add feature`는 기본적으로 `melos bootstrap`과 `build_runner`까지 자동 실행합니다.  
-> `--skip-build`를 썼을 때만 아래를 직접 실행하세요.
->
-> ```bash
-> melos bootstrap
-> melos run build:all
-> ```
+**init 직후 확인**
 
-### `lib/main.dart` 수정 (중요)
+- `lib/main.dart`에 `import 'di.dart';` + `configureDependencies();` 추가 (기존 main 유지 시)
+- 또는 `dart pub global run flutter_clean_arch_scaffold:fca init --force` 로 main까지 교체
 
-`flutter create` 직후 `init`을 실행하면 **기존 `lib/main.dart`는 유지**됩니다.  
-DI가 동작하려면 아래를 직접 추가해야 합니다.
+**이후 개발 루프**
 
-```dart
-import 'di.dart';
-
-void main() {
-  configureDependencies(); // ← runApp()보다 먼저 호출
-  runApp(const MainApp());
-}
+```bash
+tool/fca add feature order --with-ui   # 1. feature 추가
+# 2. entity · dto · API · page 등 직접 구현 (payment 예시 참고)
+tool/fca build                         # 3. .g.dart / DI 재생성
+flutter run                            # 4. 실행
 ```
 
-`init --force`를 쓰면 `main.dart`가 템플릿으로 교체되어 위 코드와 `PaymentPage` 홈 화면이 포함됩니다.
+---
 
-`init`은 **payment 예시 feature**도 함께 생성합니다 (`domain` / `data` / `presentation` 전 레이어).
+## 2. 기존 프로젝트 (migrate)
+
+이미 이 템플릿으로 만든 프로젝트가 **옛 버전**이거나 `tool/fca`, `melos.yaml`, `DataState` 등이 없을 때:
+
+```bash
+cd my_app
+tool/fca migrate
+```
+
+없는 필수 파일·의존성만 추가합니다. `bootstrap` + 코드 생성까지 자동 실행됩니다.
+
+최신 템플릿으로 **덮어쓰기**가 필요하면:
+
+```bash
+tool/fca migrate --force
+```
+
+파일만 보완하고 빌드는 직접 할 때:
+
+```bash
+tool/fca migrate --skip-build
+tool/fca build
+```
+
+---
+
+## 명령어 요약
+
+init 이후 프로젝트 루트에서 `tool/fca` 사용 (Windows: `tool\fca`).
+
+| 명령 | 설명 |
+|------|------|
+| `tool/fca init` | 구조 + payment 예시 생성 |
+| `tool/fca migrate` | 누락된 필수 파일·설정 보완 |
+| `tool/fca migrate --force` | 코어 파일·melos·di·tool/fca 덮어쓰기 |
+| `tool/fca add feature <name> --with-ui` | feature 스캐폴딩 |
+| `tool/fca build` | 전체 코드 생성 |
+| `tool/fca build --scope data` | data 패키지만 |
+| `tool/fca bootstrap` | 멀티 패키지 `pub get` |
+
+feature 이름: **snake_case** (예: `payment`, `user_profile`)
 
 ---
 
@@ -69,101 +98,40 @@ void main() {
 
 ```
 my_app/
-├── android/                  # flutter create 결과 (그대로)
-├── ios/
-├── lib/
-│   ├── main.dart
-│   └── di.dart               # init이 생성
+├── lib/           main.dart, di.dart
+├── tool/          fca, fca.bat  ← 짧은 명령 래퍼
 ├── packages/
-│   ├── domain/               # entity, repository, usecase
-│   ├── data/                 # datasource, dto, mapper, repository impl
-│   ├── presentation/         # provider, page
-│   └── design/               # 디자인 시스템, assets
+│   ├── domain/    entity, repository, usecase
+│   ├── data/      api, datasource, dto, mapper, repository
+│   ├── presentation/  provider, page
+│   └── design/
 └── melos.yaml
 ```
 
-### 레이어 의존
-
-```
-presentation → domain
-data         → domain
-design       → (독립)
-```
-
-### feature 폴더 예시 (`add feature payment --with-ui`)
+**payment 예시 위치** — 새 feature는 이 구조를 복사해서 만듭니다.
 
 ```
 packages/domain/lib/domain/payment/
-  entity/  repository/  usecase/
-
 packages/data/lib/data/payment/
-  api/  datasource/  dto/  mapper/  repository/
-
 packages/presentation/lib/payment/
-  provider/  page/
 ```
 
-### data 레이어 흐름
+**data 흐름**
 
 ```
-Retrofit API → RemoteDatasource → dto → mapper → entity
-                                              ↓
-                                    Repository (remote() → DataState)
-                                              ↓
-                                         Usecase → UI
+API → datasource → dto → mapper → entity → usecase → UI
 ```
-
-### 0.1.x → 0.2.x 마이그레이션
-
-```bash
-flutter_clean_arch migrate
-melos bootstrap   # 또는 packages/data에서 flutter pub get
-melos run build:data
-```
-
-`migrate`는 `DataState`, 네트워크 코어, `data` pubspec 의존성, Retrofit `build.yaml` 설정을
-없는 항목만 추가합니다. 기존 feature의 Repository / API 파일은 수동으로 맞춰야 합니다.
-
----
-
-## 명령어
-
-| 명령 | 설명 |
-|------|------|
-| `flutter_clean_arch init` | Clean Architecture 구조 복제 |
-| `flutter_clean_arch migrate` | 0.1.x → 원격 데이터 레이어 마이그레이션 |
-| `flutter_clean_arch migrate --skip-build` | 파일/의존성만 추가 |
-| `flutter_clean_arch add feature <name> --force` | feature + 코어 파일 덮어쓰기 |
-| `flutter_clean_arch migrate --force` | 코어 파일 강제 덮어쓰기 |
-| `flutter_clean_arch add feature <name>` | feature 스캐폴딩 |
-| `flutter_clean_arch add feature <name> --with-ui` | presentation 포함 |
-| `flutter_clean_arch add feature <name> --with-local` | local datasource 포함 |
-| `flutter_clean_arch add feature <name> --methods a,b` | 메서드 stub 지정 |
-| `flutter_clean_arch init --force` | 기존 파일 덮어쓰기 |
-| `flutter_clean_arch init --skip-build` | build_runner 생략 |
-
-`add feature` 실행 시 `DataState`, 네트워크 코어 파일, `packages/data/pubspec.yaml` 필수
-의존성이 없으면 자동으로 추가합니다 (기존 파일은 덮어쓰지 않음).
-
-feature 이름: **snake_case** (예: `payment`, `user_profile`)
 
 ---
 
 ## 문제 해결
 
-### `command not found: flutter_clean_arch` / `melos`
+**`tool/fca`를 찾을 수 없음**
 
-`dart pub global activate`는 했는데 단축 명령이 안 되면 PATH 문제입니다.  
-그때만 아래 형식으로 실행하세요.
+- init 전: `dart pub global run flutter_clean_arch_scaffold:fca init`
+- init 후: 프로젝트 루트에서 `tool\fca.bat build` (Windows)
 
-```bash
-dart pub global run flutter_clean_arch_scaffold:flutter_clean_arch init
-dart pub global run melos:melos run build:all
-```
-
-### templates 오류 / 이상한 동작 / 옛 버전이 실행됨
-
-CLI 캐시를 지우고 재설치하세요.
+**CLI가 이상함 / 옛 버전**
 
 ```bash
 dart pub global deactivate flutter_clean_arch_scaffold
@@ -172,25 +140,7 @@ dart pub global activate flutter_clean_arch_scaffold
 
 ---
 
-## pub.dev 문서 안내
-
-| 위치 | 파일 | 내용 |
-|------|------|------|
-| 패키지 카드 짧은 설명 | `pubspec.yaml` → `description` | 검색 결과에 보이는 한 줄 요약 |
-| 패키지 상세 페이지 | `tools/cli/README.md` (이 파일) | 설치법, 구조, 명령어 전체 |
-
-README를 수정한 뒤 pub.dev에 반영하려면 버전을 올리고 재배포합니다.
-
-```bash
-cd tools/cli
-# pubspec.yaml version bump + CHANGELOG
-dart pub publish
-```
-
----
-
 ## 링크
 
-- [GitHub 저장소](https://github.com/betterafter/flutter-template)
+- [GitHub](https://github.com/betterafter/flutter-template)
 - [pub.dev](https://pub.dev/packages/flutter_clean_arch_scaffold)
-- [배포 가이드](doc/PUBLISHING.md)

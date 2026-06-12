@@ -207,8 +207,17 @@ class _AddFeatureSubCommand extends Command<int> {
         '  presentation: packages/presentation/lib/${feature.fileName}/',
       );
     }
+    stdout.writeln('\n파일 수정 후 코드 재생성:');
+    stdout.writeln('  ${_fcaHint('build')}');
 
     return 0;
+  }
+
+  String _fcaHint(String args) {
+    if (Platform.isWindows) {
+      return 'tool\\fca $args';
+    }
+    return 'tool/fca $args';
   }
 
   List<String> _parseMethods(String? raw, FeatureName feature) {

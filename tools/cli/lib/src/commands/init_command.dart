@@ -4,6 +4,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 
 import '../generators/payment_example_writer.dart';
+import '../generators/project_shell_templates.dart';
 import '../utils/file_writer.dart';
 import '../utils/paths.dart';
 import '../utils/process_runner.dart';
@@ -72,10 +73,22 @@ class InitCommand extends Command<int> {
     );
     created.add('melos.yaml');
 
+    await writer.copyDirectory(
+      source: p.join(initRoot, 'tool'),
+      destination: p.join(project.root, 'tool'),
+      force: force,
+    );
+    created.add('tool/ (fca — 짧은 CLI 래퍼)');
+
+    final fcaSh = p.join(project.root, 'tool', 'fca');
+    if (!Platform.isWindows && File(fcaSh).existsSync()) {
+      await Process.run('chmod', ['+x', fcaSh]);
+    }
+
     final projectName = await ProjectNameReader.read(project.pubspec);
     await writer.writeFile(
       path: p.join(project.root, 'lib', 'di.dart'),
-      content: _diTemplate(projectName),
+      content: rootDiTemplate(projectName),
       force: force,
     );
     created.add('lib/di.dart');
@@ -114,8 +127,8 @@ class InitCommand extends Command<int> {
     if (!skipBuild) {
       stdout.writeln('\nbuild_runner를 실행합니다...');
       final runner = ProcessRunner();
-      await runner.run('dart', ['pub', 'global', 'activate', 'melos']);
-      await runner.run('melos', ['bootstrap'], workingDirectory: project.root);
+      await runner.activateGlobal('melos');
+      await runner.runMelos(['bootstrap'], workingDirectory: project.root);
       await runner.runBuildRunner(p.join(project.packagesDir, 'design'));
       await runner.runBuildRunner(p.join(project.packagesDir, 'domain'));
       await runner.runBuildRunner(p.join(project.packagesDir, 'data'));
@@ -124,7 +137,7 @@ class InitCommand extends Command<int> {
     }
 
     stdout.writeln('\n완료! payment 예시 구조를 참고해 새 feature를 추가할 수 있습니다.');
-    stdout.writeln('  flutter_clean_arch add feature order --with-ui');
+    stdout.writeln(_fcaHint('add feature order --with-ui'));
     stdout.writeln('\n예시 코드 위치:');
     stdout.writeln('  packages/domain/lib/domain/payment/');
     stdout.writeln('  packages/data/lib/data/payment/');
@@ -133,31 +146,18 @@ class InitCommand extends Command<int> {
       stdout.writeln('\n의존성 설치와 코드 생성이 완료되었습니다.');
     } else {
       stdout.writeln('\n다음 명령을 실행해주세요.');
-      stdout.writeln('  melos bootstrap');
-      stdout.writeln('  melos run build:all');
+      stdout.writeln('  ${_fcaHint('bootstrap')}');
+      stdout.writeln('  ${_fcaHint('build')}');
     }
     return 0;
   }
 
-  String _diTemplate(String projectName) => '''
-import 'package:$projectName/di.config.dart';
-import 'package:injectable/injectable.dart';
-import 'package:get_it/get_it.dart';
-import 'package:data/di.dart' as data;
-import 'package:domain/di.dart' as domain;
-import 'package:presentation/di.dart' as presentation;
-
-final di = GetIt.instance;
-
-@InjectableInit()
-GetIt configureDependencies() {
-  data.configureDependencies(getIt: di);
-  domain.configureDependencies(getIt: di);
-  presentation.configureDependencies(getIt: di);
-
-  return di.init();
-}
-''';
+  String _fcaHint(String args) {
+    if (Platform.isWindows) {
+      return 'tool\\fca $args';
+    }
+    return 'tool/fca $args';
+  }
 
   String _mainTemplate(String projectName) => '''
 import 'package:flutter/material.dart';

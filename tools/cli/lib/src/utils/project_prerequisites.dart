@@ -1,10 +1,12 @@
-import 'dart:io' show File, stdout;
+import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:yaml_edit/yaml_edit.dart';
 
+import '../generators/project_shell_templates.dart';
 import 'file_writer.dart';
 import 'paths.dart';
+import 'project_name_reader.dart';
 import 'pubspec_editor.dart';
 
 class PrerequisitesResult {
@@ -42,7 +44,8 @@ class ProjectPrerequisites {
     ProjectPaths project, {
     bool force = false,
   }) async {
-    final templatesRoot = p.join(await templateRoot(), 'init', 'packages');
+    final initRoot = p.join(await templateRoot(), 'init');
+    final templatesRoot = p.join(initRoot, 'packages');
     final createdFiles = <String>[];
     final updatedFiles = <String>[];
 
@@ -140,8 +143,67 @@ class ProjectPrerequisites {
       createdFiles.add(presentationBuildYamlRelative);
     }
 
+    final domainBuildYamlPath = project.domainPackage('build.yaml');
+    final domainBuildYamlRelative =
+        p.relative(domainBuildYamlPath, from: project.root);
+    if (force) {
+      final exists = File(domainBuildYamlPath).existsSync();
+      await _writer.copyFile(
+        source: p.join(templatesRoot, 'domain/build.yaml'),
+        destination: domainBuildYamlPath,
+        force: true,
+      );
+      if (exists) {
+        updatedFiles.add(domainBuildYamlRelative);
+      } else {
+        createdFiles.add(domainBuildYamlRelative);
+      }
+    } else if (await _writer.copyFileIfAbsent(
+      source: p.join(templatesRoot, 'domain/build.yaml'),
+      destination: domainBuildYamlPath,
+    )) {
+      createdFiles.add(domainBuildYamlRelative);
+    }
+
+    await _ensureMelosYaml(
+      project: project,
+      initRoot: initRoot,
+      force: force,
+      createdFiles: createdFiles,
+      updatedFiles: updatedFiles,
+    );
+
+    await _ensureToolWrapper(
+      project: project,
+      initRoot: initRoot,
+      force: force,
+      createdFiles: createdFiles,
+      updatedFiles: updatedFiles,
+    );
+
+    await _ensureRootDi(
+      project: project,
+      force: force,
+      createdFiles: createdFiles,
+      updatedFiles: updatedFiles,
+    );
+
     final pubspecEditor = PubspecEditor();
     final addedDependencies = <String>[];
+
+    final rootPubspecRelative = p.relative(project.pubspec, from: project.root);
+    addedDependencies.addAll(
+      (await pubspecEditor.ensureCleanArchDependencies(project.pubspec))
+          .map((name) => '$rootPubspecRelative → $name'),
+    );
+
+    final domainPubspecPath = project.domainPackage('pubspec.yaml');
+    final domainPubspecRelative =
+        p.relative(domainPubspecPath, from: project.root);
+    addedDependencies.addAll(
+      (await pubspecEditor.ensureDomainPackageDependencies(domainPubspecPath))
+          .map((name) => '$domainPubspecRelative → $name'),
+    );
 
     final dataPubspecPath = project.dataPackage('pubspec.yaml');
     final dataPubspecRelative = p.relative(dataPubspecPath, from: project.root);
@@ -165,6 +227,124 @@ class ProjectPrerequisites {
       updatedFiles: updatedFiles,
       addedDependencies: addedDependencies,
     );
+  }
+
+  Future<void> _ensureMelosYaml({
+    required ProjectPaths project,
+    required String initRoot,
+    required bool force,
+    required List<String> createdFiles,
+    required List<String> updatedFiles,
+  }) async {
+    final destination = project.melos;
+    final source = p.join(initRoot, 'melos.yaml');
+    final relative = p.relative(destination, from: project.root);
+    final exists = File(destination).existsSync();
+
+    if (force) {
+      await _writer.copyFile(
+        source: source,
+        destination: destination,
+        force: true,
+      );
+      if (exists) {
+        updatedFiles.add(relative);
+      } else {
+        createdFiles.add(relative);
+      }
+      return;
+    }
+
+    if (!exists) {
+      await _writer.copyFile(
+        source: source,
+        destination: destination,
+        force: true,
+      );
+      createdFiles.add(relative);
+      return;
+    }
+
+    final content = await File(destination).readAsString();
+    if (!content.contains('--delete-conflicting-outputs')) {
+      await _writer.copyFile(
+        source: source,
+        destination: destination,
+        force: true,
+      );
+      updatedFiles.add(relative);
+    }
+  }
+
+  Future<void> _ensureToolWrapper({
+    required ProjectPaths project,
+    required String initRoot,
+    required bool force,
+    required List<String> createdFiles,
+    required List<String> updatedFiles,
+  }) async {
+    const toolFiles = ['fca', 'fca.bat'];
+
+    for (final fileName in toolFiles) {
+      final source = p.join(initRoot, 'tool', fileName);
+      final destination = p.join(project.root, 'tool', fileName);
+      final relative = p.relative(destination, from: project.root);
+      final exists = File(destination).existsSync();
+
+      if (force) {
+        await _writer.copyFile(
+          source: source,
+          destination: destination,
+          force: true,
+        );
+        if (exists) {
+          updatedFiles.add(relative);
+        } else {
+          createdFiles.add(relative);
+        }
+        continue;
+      }
+
+      if (await _writer.copyFileIfAbsent(
+        source: source,
+        destination: destination,
+      )) {
+        createdFiles.add(relative);
+      }
+    }
+
+    final fcaPath = p.join(project.root, 'tool', 'fca');
+    if (!Platform.isWindows && File(fcaPath).existsSync()) {
+      await Process.run('chmod', ['+x', fcaPath]);
+    }
+  }
+
+  Future<void> _ensureRootDi({
+    required ProjectPaths project,
+    required bool force,
+    required List<String> createdFiles,
+    required List<String> updatedFiles,
+  }) async {
+    final diPath = p.join(project.root, 'lib', 'di.dart');
+    final relative = p.relative(diPath, from: project.root);
+    final exists = File(diPath).existsSync();
+
+    if (!force && exists) {
+      return;
+    }
+
+    final projectName = await ProjectNameReader.read(project.pubspec);
+    await _writer.writeFile(
+      path: diPath,
+      content: rootDiTemplate(projectName),
+      force: force || !exists,
+    );
+
+    if (exists) {
+      updatedFiles.add(relative);
+    } else {
+      createdFiles.add(relative);
+    }
   }
 
   Future<bool> _ensureDataModuleGenerator({
@@ -234,11 +414,11 @@ enum _BuildYamlChange { unchanged, created, updated }
 
 void printPrerequisitesResult(PrerequisitesResult result) {
   if (!result.hasChanges) {
-    stdout.writeln('원격 데이터 레이어 필수 항목이 이미 모두 적용되어 있습니다.');
+    stdout.writeln('필수 항목이 이미 모두 적용되어 있습니다.');
     return;
   }
 
-  stdout.writeln('원격 데이터 레이어 필수 항목을 적용했습니다:');
+  stdout.writeln('필수 항목을 적용했습니다:');
   for (final file in result.createdFiles) {
     stdout.writeln('  + $file');
   }
