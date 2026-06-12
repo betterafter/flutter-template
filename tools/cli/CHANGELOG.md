@@ -1,3 +1,7 @@
+## 0.2.9
+
+- `bin/fca.dart` 추가 — `dart pub global run flutter_clean_arch_scaffold:fca` 동작 수정
+
 ## 0.2.8
 
 - `migrate` 보강: `melos.yaml`, `tool/fca`, `lib/di.dart`, domain `build.yaml`, 루트/domain pubspec 의존성 자동 보완
