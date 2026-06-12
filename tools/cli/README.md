@@ -157,12 +157,9 @@ Windows **OneDrive · 한글 경로**에서만 AOT 실패가 날 수 있습니�
 
 `tool/fca build` 동작:
 
-1. 기본: `flutter pub run build_runner build` (Flutter SDK의 dart 사용)
+1. 기본: `flutter pub run build_runner build --delete-conflicting-outputs`
 2. Windows AOT 실패 시: 자동으로 `--force-jit` 재시도
 3. 수동: `tool\fca build --force-jit`
-
-> Windows에서 PATH의 `dart`가 Flutter SDK와 다르면 `dart run`이 실패합니다.  
-> `flutter pub run`을 사용하세요 (`flutter run`이 아님).
 
 ```powershell
 tool\fca build
@@ -171,7 +168,7 @@ tool\fca build --force-jit --scope data
 # 수동 (packages\data 예시)
 cd packages\data
 flutter pub get
-flutter pub run build_runner build --force-jit
+flutter pub run build_runner build --delete-conflicting-outputs --force-jit
 ```
 
 **근본 해결** — `C:\dev\my_app` 등 OneDrive 밖 ASCII 경로로 이동.

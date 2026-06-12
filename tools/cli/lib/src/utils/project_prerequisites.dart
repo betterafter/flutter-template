@@ -266,8 +266,8 @@ class ProjectPrerequisites {
     }
 
     final content = await File(destination).readAsString();
-    if (content.contains('--delete-conflicting-outputs') ||
-        content.contains('dart run build_runner')) {
+    if (content.contains('dart run build_runner') ||
+        !content.contains('--delete-conflicting-outputs')) {
       await _writer.copyFile(
         source: source,
         destination: destination,

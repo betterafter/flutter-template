@@ -3,13 +3,12 @@
 part of 'image.dart';
 
 class FlutterImages extends FlutterImage {
-  FlutterImages({
-    super.key,
-    super.svg,
-    super.size,
-    super.color,
-    super.width,
-    super.height,
-    super.colorBlendMode,
-  });
+  FlutterImages(
+      {super.key,
+      super.svg,
+      super.size,
+      super.color,
+      super.width,
+      super.height,
+      super.colorBlendMode});
 }

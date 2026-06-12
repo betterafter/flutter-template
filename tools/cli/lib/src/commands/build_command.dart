@@ -109,7 +109,9 @@ class BuildCommand extends Command<int> {
     stderr.writeln('  - tool/fca build --clean 으로 캐시 삭제 후 재시도');
     if (Platform.isWindows) {
       stderr.writeln('  - tool/fca build --force-jit (AOT 오류 시)');
-      stderr.writeln('  - 수동: flutter pub run build_runner build --force-jit');
+      stderr.writeln(
+        '  - 수동: flutter pub run build_runner build --delete-conflicting-outputs --force-jit',
+      );
       stderr.writeln('  - OneDrive·바탕 화면 대신 C:\\dev\\my_app 등 로컬 ASCII 경로');
       stderr.writeln('  - IDE 종료, Windows Defender 제어된 폴더 액세스 확인');
     }

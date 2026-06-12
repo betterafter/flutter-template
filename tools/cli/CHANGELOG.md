@@ -1,3 +1,16 @@
+## 0.2.19
+
+- Mac/Windows 공통: `flutter pub run build_runner build --delete-conflicting-outputs`
+- melos.yaml·CLI·init 템플릿 통일
+
+## 0.2.18
+
+- **회귀 수정**: `init` 실패 (design 패키지 exit 78)
+  - `--delete-conflicting-outputs` 복원 (템플릿 `image.generated.dart` 충돌)
+  - Mac/Linux는 `dart run build_runner`로 복원 (0.2.16 `flutter pub run` 회귀)
+  - Windows만 `flutter pub run build_runner` 유지
+- `migrate` melos.yaml 갱신 조건 버그 수정
+
 ## 0.2.17
 
 - `migrate`: `dart run build_runner`가 남아 있으면 melos.yaml 갱신

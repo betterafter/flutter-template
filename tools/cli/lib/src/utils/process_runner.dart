@@ -91,9 +91,8 @@ class ProcessRunner {
     );
   }
 
-  /// Flutter 프로젝트에서는 `flutter pub run build_runner` 사용.
-  /// Windows에서 PATH의 `dart`가 Flutter SDK와 다르면 `dart run`이 실패할 수 있음.
-  /// 기본은 AOT. Windows AOT 실패 시에만 --force-jit 재시도.
+  /// `flutter pub run build_runner build --delete-conflicting-outputs`
+  /// flutter 없을 때만 `dart run` fallback. Windows AOT 실패 시 `--force-jit` 재시도.
   Future<void> runBuildRunner(
     String packagePath, {
     bool clean = false,
@@ -164,21 +163,20 @@ class ProcessRunner {
     required bool forceJit,
     required bool useFlutter,
   }) {
-    if (useFlutter) {
-      return [
-        'pub',
-        'run',
-        'build_runner',
-        'build',
-        if (forceJit) '--force-jit',
-      ];
-    }
-
     return [
-      'run',
+      if (useFlutter) ...['pub', 'run'] else 'run',
       'build_runner',
       'build',
       if (forceJit) '--force-jit',
+      '--delete-conflicting-outputs',
+    ];
+  }
+
+  List<String> _buildRunnerCleanArgs({required bool useFlutter}) {
+    return [
+      if (useFlutter) ...['pub', 'run'] else 'run',
+      'build_runner',
+      'clean',
     ];
   }
 
@@ -192,9 +190,7 @@ class ProcessRunner {
     final useFlutter = await _commandExists('flutter');
     await run(
       _buildRunnerExecutable(useFlutter),
-      useFlutter
-          ? ['pub', 'run', 'build_runner', 'clean']
-          : ['run', 'build_runner', 'clean'],
+      _buildRunnerCleanArgs(useFlutter: useFlutter),
       workingDirectory: packagePath,
     );
   }
