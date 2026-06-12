@@ -1,3 +1,8 @@
+## 0.2.11
+
+- README: `tool/fca` 없을 때 migrate는 `dart pub global run ... fca migrate` 사용 안내
+- `migrate` 완료 시 `tool/fca` 생성 안내 메시지 추가
+
 ## 0.2.10
 
 - README: `tool/fca build --scope` 레이어별 빌드 안내 추가 (기본값 `all`)
