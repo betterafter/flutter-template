@@ -11,7 +11,7 @@ Flutter Clean Architecture를 **CLI로 프로젝트에 복제**하는 템플릿�
 |------|------|
 | **처음 설치** (PC당 1회) | `dart pub global activate flutter_clean_arch_scaffold` |
 | **새 프로젝트 시작** | `dart pub global run flutter_clean_arch_scaffold:fca init` |
-| **구버전 / 누락 파일 보완** | `tool/fca migrate` |
+| **구버전 / 누락 파일 보완** | `dart pub global run ... fca migrate` (tool/fca 없을 때) |
 | **feature 추가** | `tool/fca add feature order --with-ui` |
 | **파일 수정 후 코드 재생성** | `tool/fca build` (전체) / `tool/fca build --scope data` (레이어별) |
 | **앱 실행** | `flutter run` |
@@ -59,19 +59,19 @@ flutter run
 
 ## 2. 기존 프로젝트 (migrate)
 
-옛 버전이거나 `tool/fca`, `DataState`, `melos.yaml` 등이 빠진 프로젝트:
+> **`tool/fca`가 없으면 `tool/fca migrate`는 안 됩니다.** 첫 migrate는 긴 명령으로 실행하세요.
 
 ```bash
 cd my_shop
-tool/fca migrate
+
+# tool/fca 없을 때 (기존 프로젝트 최초 1회)
+dart pub global run flutter_clean_arch_scaffold:fca migrate
+
+dart pub global run flutter_clean_arch_scaffold:fca migrate --force        # 덮어쓰기
+dart pub global run flutter_clean_arch_scaffold:fca migrate --skip-build   # 파일만
 ```
 
-누락된 필수 항목을 채우고 `bootstrap` + 코드 생성까지 실행합니다.
-
-```bash
-tool/fca migrate --force        # 최신 템플릿으로 덮어쓰기
-tool/fca migrate --skip-build   # 파일만 보완
-```
+migrate 후 `tool/fca build`, `tool/fca migrate` 등 짧은 명령 사용 가능.
 
 ---
 

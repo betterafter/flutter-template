@@ -12,7 +12,7 @@ Flutter Clean Architecture 멀티 패키지 구조를 기존 프로젝트에 복
 |------|------|
 | **처음 설치** (PC당 1회) | `dart pub global activate flutter_clean_arch_scaffold` |
 | **새 프로젝트 시작** (`tool/fca` 없을 때) | `dart pub global run flutter_clean_arch_scaffold:fca init` |
-| **구버전 / 누락 파일 보완** | `tool/fca migrate` |
+| **구버전 / 누락 파일 보완** | `dart pub global run ... fca migrate` (tool/fca 없을 때) |
 | **feature 추가** | `tool/fca add feature order --with-ui` |
 | **파일 수정 후 코드 재생성** | `tool/fca build` |
 | **앱 실행** | `flutter run` |
@@ -52,25 +52,32 @@ flutter run                            # 4. 실행
 
 ## 2. 기존 프로젝트 (migrate)
 
-이미 이 템플릿으로 만든 프로젝트가 **옛 버전**이거나 `tool/fca`, `melos.yaml`, `DataState` 등이 없을 때:
+옛 버전이거나 `tool/fca`, `melos.yaml`, `DataState` 등이 없을 때:
+
+> **`tool/fca`가 없으면 `tool/fca migrate`는 실행할 수 없습니다.**  
+> `migrate`가 `tool/fca`를 만들어 주므로, **첫 migrate는 아래 긴 명령**을 쓰세요.
 
 ```bash
 cd my_app
-tool/fca migrate
+
+# tool/fca 없을 때 (기존 프로젝트 최초 1회)
+dart pub global run flutter_clean_arch_scaffold:fca migrate
+
+# 덮어쓰기 필요 시
+dart pub global run flutter_clean_arch_scaffold:fca migrate --force
 ```
 
-없는 필수 파일·의존성만 추가합니다. `bootstrap` + 코드 생성까지 자동 실행됩니다.
-
-최신 템플릿으로 **덮어쓰기**가 필요하면:
+migrate 완료 후에는 프로젝트 루트에서:
 
 ```bash
-tool/fca migrate --force
+tool/fca build
+tool/fca migrate          # 이후부터는 짧은 명령 가능
 ```
 
 파일만 보완하고 빌드는 직접 할 때:
 
 ```bash
-tool/fca migrate --skip-build
+dart pub global run flutter_clean_arch_scaffold:fca migrate --skip-build
 tool/fca build
 ```
 

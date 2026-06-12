@@ -50,6 +50,13 @@ class MigrateCommand extends Command<int> {
 
     stdout.writeln('프로젝트 마이그레이션을 시작합니다...\n');
 
+    if (!_hasToolWrapper(project)) {
+      stdout.writeln('ℹ tool/fca가 없습니다. migrate 완료 후 생성됩니다.');
+      stdout.writeln(
+        '  (다음부터는 ${_fcaHint('migrate')} 로 실행 가능)\n',
+      );
+    }
+
     final result =
         await ProjectPrerequisites(FileWriter()).ensure(project, force: force);
     printPrerequisitesResult(result);
@@ -57,6 +64,9 @@ class MigrateCommand extends Command<int> {
 
     if (!result.hasChanges) {
       stdout.writeln('추가 작업이 필요하지 않습니다.');
+      if (_hasToolWrapper(project)) {
+        stdout.writeln('이후 명령: ${_fcaHint('build')}');
+      }
       return 0;
     }
 
@@ -81,6 +91,14 @@ class MigrateCommand extends Command<int> {
     }
 
     stdout.writeln('마이그레이션 완료!');
+
+    if (_toolWrapperWasProvisioned(result)) {
+      stdout.writeln('');
+      stdout.writeln('✓ tool/fca가 생성되었습니다. 이후 프로젝트 루트에서:');
+      stdout.writeln('  ${_fcaHint('build')}');
+      stdout.writeln('  ${_fcaHint('add feature <name> --with-ui')}');
+    }
+
     stdout.writeln('');
     stdout.writeln('다음 단계:');
     stdout.writeln('  1. 기존 feature의 Repository / Usecase를 DataState + remote() 패턴으로 수정');
@@ -88,6 +106,18 @@ class MigrateCommand extends Command<int> {
     stdout.writeln('  3. 파일 수정 후 코드 재생성: ${_fcaHint('build')}');
 
     return 0;
+  }
+
+  bool _hasToolWrapper(ProjectPaths project) {
+    final toolDir = p.join(project.root, 'tool');
+    return File(p.join(toolDir, 'fca')).existsSync() ||
+        File(p.join(toolDir, 'fca.bat')).existsSync();
+  }
+
+  bool _toolWrapperWasProvisioned(PrerequisitesResult result) {
+    return result.createdFiles.any(
+      (file) => file.replaceAll(r'\', '/').contains('tool/fca'),
+    );
   }
 
   String _fcaHint(String args) {

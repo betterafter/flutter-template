@@ -1,3 +1,7 @@
+## 0.2.10
+
+- README: `tool/fca build --scope` 레이어별 빌드 안내 추가 (기본값 `all`)
+
 ## 0.2.9
 
 - `bin/fca.dart` 추가 — `dart pub global run flutter_clean_arch_scaffold:fca` 동작 수정
