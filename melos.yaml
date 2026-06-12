@@ -6,22 +6,22 @@ packages:
 
 scripts:
   build:all:
-    run: melos exec -c 1 -- "flutter pub get && dart run build_runner build"
+    run: melos exec -c 1 -- "flutter pub get && dart run build_runner build --delete-conflicting-outputs"
 
   build:di:
-    run: melos exec -c 1 -- "dart run build_runner build"
+    run: melos exec -c 1 -- "dart run build_runner build --delete-conflicting-outputs"
 
   build:design:
-    run: melos exec -c 1 --scope=design -- "find lib -name 'image.generated.dart' -delete && dart run build_runner build"
+    run: melos exec -c 1 --scope=design -- "find lib -name 'image.generated.dart' -delete && dart run build_runner build --delete-conflicting-outputs"
 
   build:presentation:
-    run: melos exec -c 1 --scope=presentation -- "dart run build_runner build"
+    run: melos exec -c 1 --scope=presentation -- "dart run build_runner build --delete-conflicting-outputs"
 
   build:data:
-    run: melos exec -c 1 --scope=data -- "dart run build_runner build"
+    run: melos exec -c 1 --scope=data -- "dart run build_runner build --delete-conflicting-outputs"
 
   build:domain:
-    run: melos exec -c 1 --scope=domain -- "dart run build_runner build"
+    run: melos exec -c 1 --scope=domain -- "dart run build_runner build --delete-conflicting-outputs"
 
   clean:
     run: melos exec -- flutter clean
@@ -34,5 +34,5 @@ scripts:
 # [   melos run clean   ] : 클린 실행
 # [   melos run analyze   ] : 분석 실행
 # [   melos bootstrap   ] : 부트스트랩 실행 (pub get 실행)
-# [   melos exec --scope=data -- dart run build_runner build   ] : data 범위에서 build runner 실행
+# [   melos exec --scope=data -- dart run build_runner build --delete-conflicting-outputs   ] : data 범위에서 build runner 실행
 # [   melos exec -- flutter test   ] : 테스트 실행
