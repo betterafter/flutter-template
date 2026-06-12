@@ -1,3 +1,10 @@
+## 0.2.6
+
+- README 사용법 정리
+  - `init` / `add feature`가 melos bootstrap·코드 생성까지 자동 처리함을 명시
+  - 불필요한 melos 수동 실행 단계 제거
+  - `dart pub global run`은 `command not found` 시 우회 방법으로만 안내
+
 ## 0.2.5
 
 - melos `build:*` 및 CLI `build_runner` 실행 시 `--delete-conflicting-outputs` 기본 적용
